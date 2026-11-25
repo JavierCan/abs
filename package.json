@@ -1,0 +1,9 @@
+{
+  "name": "abs3-flower-lab",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/verify.mjs && node tests/api-client.test.mjs && node tests/apps-script.test.mjs && node tests/apps-script-ui.test.mjs",
+    "build": "python3 build.py && python3 build_apps_script.py"
+  }
+}

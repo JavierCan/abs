@@ -1,0 +1,1800 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="abs<3">
+  <link rel="manifest" href="<?= manifestUrl ?>">
+  <link rel="apple-touch-icon" sizes="180x180" href="<?= touchIconUrl ?>">
+  <link rel="icon" type="image/png" sizes="192x192" href="<?= icon192Url ?>">
+  <link rel="icon" type="image/png" sizes="512x512" href="<?= icon512Url ?>">
+  <title>abs&lt;3</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --black: #000;
+      --ink: #f4f0ff;
+      --violet: #9286ff;
+      --rose: #ff76a2;
+      --line: rgba(151, 135, 255, .17);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      min-width: 320px;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      overscroll-behavior: none;
+      background: var(--black);
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button { font: inherit; }
+
+    .app {
+      position: relative;
+      width: 100%;
+      height: 100svh;
+      min-height: 100%;
+      isolation: isolate;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(39, 26, 74, .13), transparent 36%),
+        #000;
+    }
+
+    .stars,
+    .stars::before,
+    .stars::after {
+      position: absolute;
+      inset: 0;
+      content: "";
+      pointer-events: none;
+      background-repeat: repeat;
+    }
+
+    .stars {
+      z-index: -1;
+      opacity: .42;
+      background-image:
+        radial-gradient(circle, rgba(194, 185, 255, .82) 0 1px, transparent 1.4px),
+        radial-gradient(circle, rgba(255, 188, 219, .72) 0 .75px, transparent 1.2px);
+      background-position: 17px 29px, 83px 127px;
+      background-size: 137px 173px, 211px 233px;
+      mask-image: linear-gradient(to bottom, transparent 2%, #000 20%, #000 78%, transparent 98%);
+    }
+
+    .stars::before {
+      opacity: .55;
+      background-image: radial-gradient(circle, rgba(126, 109, 255, .78) 0 .8px, transparent 1.3px);
+      background-position: 61px 91px;
+      background-size: 263px 197px;
+    }
+
+    .bouquet-stage {
+      position: absolute;
+      inset: max(.35rem, env(safe-area-inset-top)) 0 max(.2rem, env(safe-area-inset-bottom));
+      display: grid;
+      place-items: center;
+      transition: transform .55s cubic-bezier(.22, 1, .36, 1), opacity .45s ease;
+    }
+
+    .bouquet {
+      display: block;
+      width: min(112vw, 42rem);
+      height: min(97svh, 58rem);
+      overflow: visible;
+      filter: drop-shadow(0 24px 34px rgba(0, 0, 0, .72));
+      touch-action: manipulation;
+    }
+
+    .bouquet .bouquet-piece {
+      cursor: pointer;
+      outline: none;
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: opacity .35s ease, filter .35s ease;
+    }
+
+    .bouquet.has-selection .bouquet-piece:not(.is-selected) {
+      opacity: .12 !important;
+      filter: saturate(.45);
+    }
+
+    .bouquet.has-selection .bouquet-piece.is-selected {
+      opacity: 1 !important;
+      filter: drop-shadow(0 0 11px rgba(163, 143, 255, .5));
+    }
+
+    .app.panel-open .bouquet-stage {
+      transform: translateY(-6svh) scale(.92);
+    }
+
+    .permission-bud {
+      position: absolute;
+      z-index: 4;
+      top: max(10svh, calc(env(safe-area-inset-top) + 3.2rem));
+      right: clamp(1.5rem, 13vw, 5.5rem);
+      width: 4.6rem;
+      height: 4.6rem;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      color: transparent;
+      background: radial-gradient(circle, rgba(66, 30, 49, .76) 0 34%, rgba(43, 23, 38, .44) 35% 63%, transparent 64%);
+      opacity: 0;
+      transform: scale(.54);
+      pointer-events: none;
+      transition: opacity .6s ease, transform .7s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .permission-bud::before,
+    .permission-bud::after {
+      position: absolute;
+      top: 1.2rem;
+      left: 50%;
+      width: .78rem;
+      height: 2.1rem;
+      content: "";
+      border-radius: 85% 15% 70% 30%;
+      transform-origin: 50% 100%;
+      background: linear-gradient(180deg, #ff99b9 0%, #e64f80 54%, #8b234a 100%);
+      box-shadow: 0 0 16px rgba(255, 85, 140, .42);
+    }
+
+    .permission-bud::before { transform: translateX(-50%) rotate(-13deg); }
+    .permission-bud::after { transform: translateX(-50%) rotate(13deg) scaleX(-1); }
+
+    .permission-bud span {
+      position: absolute;
+      top: 3.05rem;
+      left: 50%;
+      width: .18rem;
+      height: 1.3rem;
+      border-radius: 999px;
+      transform: translateX(-50%);
+      background: #235b43;
+    }
+
+    .permission-bud.is-visible {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+      animation: bud-breathe 4.6s ease-in-out infinite;
+    }
+
+    .permission-bud.is-leaving {
+      opacity: 0;
+      transform: translate(-18vw, 24svh) scale(.34);
+      pointer-events: none;
+    }
+
+    .permission-bud:focus-visible { outline: 1px solid rgba(255, 152, 194, .72); }
+
+    .equation-panel {
+      position: absolute;
+      z-index: 6;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      min-height: 27svh;
+      padding: 1.15rem max(1.4rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1.4rem, env(safe-area-inset-left));
+      border-top: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(0, 0, 0, .72), #000 20%);
+      opacity: 0;
+      transform: translateY(102%);
+      pointer-events: none;
+      transition: opacity .4s ease, transform .55s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .equation-panel.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .equation {
+      width: min(100%, 24rem);
+      margin: 0 auto;
+      color: #f4efff;
+      font-size: clamp(.72rem, 3.2vw, .9rem);
+      line-height: 1.8;
+      letter-spacing: .015em;
+      white-space: pre-line;
+    }
+
+    .equation .meta { color: var(--violet); }
+    .equation .species { color: var(--rose); }
+
+    .splash {
+      position: absolute;
+      z-index: 20;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: #000;
+      opacity: 1;
+      pointer-events: none;
+      transition: opacity .22s ease;
+    }
+
+    .splash.is-hidden { opacity: 0; }
+
+    .splash-mark {
+      position: relative;
+      width: 5.2rem;
+      height: 5.2rem;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(66, 41, 116, .32), rgba(15, 10, 30, .74) 58%, transparent 60%);
+      animation: splash-bloom .72s cubic-bezier(.16, 1, .3, 1) both;
+    }
+
+    .splash-mark i {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: .52rem;
+      height: 1.72rem;
+      border-radius: 50% 50% 40% 40%;
+      transform-origin: 50% 100%;
+      background: linear-gradient(#ff90b6, #cb285f);
+      box-shadow: 0 0 10px rgba(255, 83, 139, .32);
+    }
+
+    .splash-mark i:nth-child(1) { transform: translate(-50%, -100%) rotate(0deg); }
+    .splash-mark i:nth-child(2) { transform: translate(-50%, -100%) rotate(60deg); }
+    .splash-mark i:nth-child(3) { transform: translate(-50%, -100%) rotate(120deg); }
+    .splash-mark i:nth-child(4) { transform: translate(-50%, -100%) rotate(180deg); }
+    .splash-mark i:nth-child(5) { transform: translate(-50%, -100%) rotate(240deg); }
+    .splash-mark i:nth-child(6) { transform: translate(-50%, -100%) rotate(300deg); }
+
+    .splash-mark::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 1rem;
+      height: 1rem;
+      content: "";
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: #642345;
+      box-shadow: 0 0 0 .2rem rgba(255, 96, 153, .08);
+    }
+
+    .vigil-glow {
+      position: absolute;
+      z-index: 3;
+      top: 10svh;
+      left: 50%;
+      width: min(54vw, 13rem);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      transform: translateX(-50%) scale(.7);
+      background: radial-gradient(circle, rgba(118, 54, 82, .4), rgba(60, 31, 68, .17) 46%, transparent 70%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .8s ease, transform 1.2s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .app.is-vigil .vigil-glow {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      animation: vigil 3.6s ease-in-out infinite;
+    }
+
+    @keyframes splash-bloom {
+      from { opacity: 0; transform: scale(.42) rotate(-18deg); }
+      to { opacity: 1; transform: scale(1) rotate(0); }
+    }
+
+    @keyframes bud-breathe {
+      0%, 100% { filter: brightness(.92); }
+      50% { filter: brightness(1.14); }
+    }
+
+    @keyframes vigil {
+      0%, 100% { filter: brightness(.8); }
+      50% { filter: brightness(1.22); }
+    }
+
+    @media (max-height: 600px) {
+      .bouquet { height: 78svh; width: min(88vw, 28rem); }
+      .equation-panel { min-height: 31svh; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="app" class="app">
+    <div class="stars" aria-hidden="true"></div>
+    <div class="vigil-glow" aria-hidden="true"></div>
+
+    <div class="bouquet-stage" id="bouquetStage">
+      <svg id="bouquet" class="bouquet" role="img" aria-label="Ramo vivo"></svg>
+    </div>
+
+    <button id="permissionBud" class="permission-bud" type="button" aria-label="Activar el aviso de la próxima flor" hidden>
+      <span aria-hidden="true"></span>
+    </button>
+
+    <aside id="equationPanel" class="equation-panel" aria-hidden="true">
+      <div id="equation" class="equation"></div>
+    </aside>
+
+    <div id="splash" class="splash" aria-hidden="true">
+      <span class="splash-mark">
+        <i></i><i></i><i></i><i></i><i></i><i></i>
+      </span>
+    </div>
+  </main>
+
+  <script>
+/* flowers.js */
+/**
+ * abs<3 — generador matemático de flores
+ * Fase 1: matemática pura. Sin DOM, sin animación, sin red.
+ * Todo es determinista: misma semilla + mismo mes = misma flor, siempre.
+ */
+
+/* ── Constantes ─────────────────────────────────────────────── */
+
+const PHI = (1 + Math.sqrt(5)) / 2;
+const PSI = 2 * Math.PI * (1 - 1 / PHI);   // ángulo áureo, radianes
+const PSI_DEG = (PSI * 180) / Math.PI;     // 137.50776...
+const SPECIES = ['hortensia', 'tulipan', 'gerbera', 'lirio'];
+
+/* ── Azar reproducible ──────────────────────────────────────── */
+
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+function mulberry32(a) {
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function rngFor(seed, tag) {
+  return mulberry32(fnv1a(seed + ':' + tag));
+}
+
+/* ── Bolsa de especies por ciclos de cuatro ─────────────────── */
+
+function speciesForMonth(seed, m) {
+  const cycle = Math.floor((m - 1) / 4);
+  const rnd = rngFor(seed, 'cycle' + cycle);
+  const bag = SPECIES.slice();
+  for (let i = bag.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    const tmp = bag[i];
+    bag[i] = bag[j];
+    bag[j] = tmp;
+  }
+  return bag[(m - 1) % 4];
+}
+
+/* ── Filotaxis de Vogel: dónde se coloca la pieza del mes m ──── */
+
+const PLANE_SCALE = [0.80, 0.90, 1.00];
+
+function placement(m, opts = {}) {
+  const c = opts.c ?? 26;          // separación radial; NO depende del total
+  const kappa = opts.kappa ?? 0.72; // compresión vertical del ramo
+  const theta = m * PSI;
+  const rho = c * Math.sqrt(m);
+  const plane = m % 3;
+  return {
+    theta,
+    rho,
+    x: rho * Math.cos(theta),
+    y: -kappa * rho * Math.sin(theta),
+    scale: (opts.s0 ?? 1) * PLANE_SCALE[plane],
+    plane
+  };
+}
+
+/* ── Superfórmula de Gielis ─────────────────────────────────── */
+
+function superformula(t, p) {
+  const a = p.a ?? 1;
+  const b = p.b ?? 1;
+  const t1 = Math.pow(Math.abs(Math.cos((p.p * t) / 4) / a), p.n2);
+  const t2 = Math.pow(Math.abs(Math.sin((p.p * t) / 4) / b), p.n3);
+  const s = t1 + t2;
+  return s === 0 ? 0 : Math.pow(s, -1 / p.n1);
+}
+
+function superPath(p, radius, steps = 200) {
+  let max = 0;
+  const raw = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * 2 * Math.PI;
+    const r = superformula(t, p);
+    raw.push([t, isFinite(r) ? r : 0]);
+    if (isFinite(r) && r > max) max = r;
+  }
+  if (max === 0) return '';
+  let d = '';
+  for (let i = 0; i < raw.length; i++) {
+    const r = (raw[i][1] / max) * radius;
+    const x = r * Math.cos(raw[i][0]);
+    const y = r * Math.sin(raw[i][0]);
+    d += (i === 0 ? 'M ' : ' L ') + n(x) + ' ' + n(y);
+  }
+  return d + ' Z';
+}
+
+/* ── Utilidades de trazo ────────────────────────────────────── */
+
+const n = (v) => (Math.round(v * 100) / 100).toString();
+
+function closedPath(right, left) {
+  let d = 'M ' + n(right[0][0]) + ' ' + n(right[0][1]);
+  for (let i = 1; i < right.length; i++) d += ' L ' + n(right[i][0]) + ' ' + n(right[i][1]);
+  for (let i = left.length - 1; i >= 0; i--) d += ' L ' + n(left[i][0]) + ' ' + n(left[i][1]);
+  return d + ' Z';
+}
+
+/** Perfil de pétalo: x(u) = w·sin(π·u^e), y(u) = −L·u */
+function petalPath(L, w, e = 0.8, steps = 16) {
+  const right = [], left = [];
+  for (let i = 0; i <= steps; i++) {
+    const u = i / steps;
+    const x = w * Math.sin(Math.PI * Math.pow(u, e));
+    const y = -L * u;
+    right.push([x, y]);
+    left.push([-x, y]);
+  }
+  return closedPath(right, left);
+}
+
+/** Tépalo recurvado: x(u) = w·sin(πu)(1−βu), y(u) = −L·u + c·u³ */
+function recurvedPath(L, w, beta, c, steps = 18) {
+  const right = [], left = [];
+  for (let i = 0; i <= steps; i++) {
+    const u = i / steps;
+    const x = w * Math.sin(Math.PI * u) * (1 - beta * u);
+    const y = -L * u + c * L * Math.pow(u, 3);
+    right.push([x, y]);
+    left.push([-x, y]);
+  }
+  return closedPath(right, left);
+}
+
+/** Rosa de 4 pétalos: r(θ) = a·|cos(2θ)| */
+function rosePath(a, steps = 72) {
+  let d = '';
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * 2 * Math.PI;
+    const r = a * Math.abs(Math.cos(2 * t));
+    d += (i === 0 ? 'M ' : ' L ') + n(r * Math.cos(t)) + ' ' + n(r * Math.sin(t));
+  }
+  return d + ' Z';
+}
+
+/** Bézier cúbica con apertura: rota P1 y P2 sobre P0 un ángulo α */
+function bezierTepal(L, w, alphaDeg) {
+  const a = (alphaDeg * Math.PI) / 180;
+  const rot = (px, py) => [
+    px * Math.cos(a) - py * Math.sin(a),
+    px * Math.sin(a) + py * Math.cos(a)
+  ];
+  const p1 = rot(-w, -0.35 * L);
+  const p2 = rot(-w * 0.85, -0.85 * L);
+  const q1 = rot(w * 0.85, -0.85 * L);
+  const q2 = rot(w, -0.35 * L);
+  return (
+    'M 0 0 C ' + n(p1[0]) + ' ' + n(p1[1]) + ' ' + n(p2[0]) + ' ' + n(p2[1]) +
+    ' 0 ' + n(-L) + ' C ' + n(q1[0]) + ' ' + n(q1[1]) + ' ' + n(q2[0]) + ' ' + n(q2[1]) + ' 0 0 Z'
+  );
+}
+
+/* ── Parámetros por especie ─────────────────────────────────── */
+
+const pick = (rnd, lo, hi) => lo + rnd() * (hi - lo);
+
+function paramsFor(species, rnd) {
+  switch (species) {
+    case 'gerbera':
+      return {
+        n: Math.round(pick(rnd, 26, 32)),
+        L: pick(rnd, 42, 50),
+        w: pick(rnd, 5.2, 6.4),
+        p: Math.round(pick(rnd, 22, 30)),
+        n1: pick(rnd, 0.62, 0.78),
+        n2: pick(rnd, 2.1, 2.7),
+        n3: pick(rnd, 2.1, 2.7),
+        discN: Math.round(pick(rnd, 76, 96)),
+        discR: pick(rnd, 9.5, 12),
+        hue: Math.round(pick(rnd, 340, 352))
+      };
+    case 'hortensia':
+      return {
+        N: Math.round(pick(rnd, 118, 148)),
+        R: pick(rnd, 33, 40),
+        a: pick(rnd, 4.9, 5.7),
+        hue: Math.round(pick(rnd, 254, 268))
+      };
+    case 'tulipan':
+      return {
+        L: pick(rnd, 52, 60),
+        w: pick(rnd, 15.5, 18.5),
+        a0: 4,
+        a1: pick(rnd, 32, 40),
+        hue: Math.round(pick(rnd, 348, 358))
+      };
+    case 'lirio':
+      return {
+        L: pick(rnd, 50, 58),
+        w: pick(rnd, 9, 11.5),
+        beta: pick(rnd, 0.46, 0.58),
+        c: pick(rnd, 0.30, 0.42),
+        p: 6,
+        n1: pick(rnd, 0.78, 0.92),
+        n2: 1.7, n3: 1.7,
+        hue: Math.round(pick(rnd, 304, 320))
+      };
+  }
+}
+
+/* ── Constructores ──────────────────────────────────────────── */
+
+function gerbera(p, tau, lod) {
+  const parts = [];
+  const L = p.L * tau;
+  const hue = p.hue;
+  const petals = Math.max(9, Math.round(p.n * lod));
+  const discCount = Math.max(10, Math.round(p.discN * lod));
+
+  parts.push({ t: 'path', d: superPath(p, p.L * 1.15), fill: `hsl(${hue} 90% 62% / 0.07)` });
+  parts.push({ t: 'circle', r: p.L * 0.75, fill: `hsl(${hue} 90% 62% / 0.10)` });
+
+  for (let j = 0; j < petals; j++) {
+    const alpha = (360 * j) / petals;
+    parts.push({
+      t: 'path',
+      d: petalPath(L, p.w, 0.8),
+      fill: `hsl(${hue} ${72 + (j % 3) * 4}% ${46 + (j % 2) * 6}%)`,
+      rot: alpha * tau
+    });
+  }
+  const inner = Math.max(6, Math.round(petals * 0.7));
+  for (let j = 0; j < inner; j++) {
+    const alpha = (360 * j) / inner + 180 / inner;
+    parts.push({
+      t: 'path',
+      d: petalPath(L * 0.58, p.w * 0.82, 0.8),
+      fill: `hsl(${hue} 88% ${64 + (j % 2) * 6}%)`,
+      rot: alpha * tau
+    });
+  }
+
+  const discR = p.discR * tau;
+  parts.push({ t: 'circle', r: discR, fill: `hsl(24 72% 22%)` });
+  const c = discR / Math.sqrt(discCount);
+  for (let i = 1; i <= discCount; i++) {
+    const r = c * Math.sqrt(i);
+    const t = i * PSI;
+    parts.push({
+      t: 'circle',
+      cx: r * Math.cos(t),
+      cy: r * Math.sin(t),
+      r: 0.75,
+      fill: i > discCount * 0.55 ? 'hsl(38 92% 64%)' : 'hsl(30 80% 46%)'
+    });
+  }
+  return parts;
+}
+
+function hortensia(p, tau, lod) {
+  const parts = [];
+  const R = p.R * tau;
+  const count = Math.max(14, Math.round(p.N * lod));
+  parts.push({ t: 'circle', r: R * 1.7, fill: `hsl(${p.hue} 88% 66% / 0.09)` });
+  const c = R / Math.sqrt(count);
+  for (let i = 1; i <= count; i++) {
+    const rho = c * Math.sqrt(i);
+    const t = i * PSI;
+    const s = (0.3 + 0.7 * tau) * (1 - 0.35 * Math.pow(rho / R, 2));
+    const light = 62 - 14 * (rho / R);
+    parts.push({
+      t: 'path',
+      d: rosePath(p.a),
+      fill: `hsl(${p.hue + (i % 5) * 2} 76% ${light.toFixed(1)}%)`,
+      tx: rho * Math.cos(t),
+      ty: rho * Math.sin(t),
+      sc: s,
+      rot: (t * 180) / Math.PI
+    });
+    if (lod > 0.5) {
+      parts.push({
+        t: 'circle',
+        cx: rho * Math.cos(t),
+        cy: rho * Math.sin(t),
+        r: 0.9 * s,
+        fill: 'hsl(258 100% 95%)'
+      });
+    }
+  }
+  return parts;
+}
+
+function tulipan(p, tau) {
+  const parts = [];
+  const alpha = p.a0 + tau * (p.a1 - p.a0);
+  parts.push({ t: 'circle', cy: -p.L * 0.45, r: p.L * 0.78, fill: `hsl(${p.hue} 90% 60% / 0.08)` });
+  for (let j = 0; j < 3; j++) {
+    parts.push({
+      t: 'path',
+      d: bezierTepal(p.L * 0.94, p.w * 1.06, alpha * 1.25),
+      fill: `hsl(${p.hue} 72% 28%)`,
+      rot: 60 * j + 30
+    });
+  }
+  for (let j = 0; j < 3; j++) {
+    parts.push({
+      t: 'path',
+      d: bezierTepal(p.L, p.w, alpha),
+      fill: `hsl(${p.hue} 80% ${44 + j * 3}%)`,
+      rot: 60 * j
+    });
+  }
+  parts.push({
+    t: 'path',
+    d: bezierTepal(p.L * 0.7, p.w * 0.5, alpha * 0.6),
+    fill: `hsl(${p.hue} 92% 72% / 0.42)`
+  });
+  return parts;
+}
+
+function lirio(p, tau) {
+  const parts = [];
+  const L = p.L * (0.35 + 0.65 * tau);
+  const spread = 0.35 + 0.65 * tau;
+  parts.push({ t: 'path', d: superPath(p, p.L * 1.1), fill: `hsl(${p.hue} 80% 80% / 0.07)` });
+  for (let j = 0; j < 3; j++) {
+    parts.push({
+      t: 'path',
+      d: recurvedPath(L * 0.96, p.w, p.beta, p.c * tau),
+      fill: `hsl(${p.hue} 46% 68%)`,
+      rot: (60 * j + 30) * spread
+    });
+  }
+  for (let j = 0; j < 3; j++) {
+    parts.push({
+      t: 'path',
+      d: recurvedPath(L, p.w * 1.05, p.beta, p.c * tau),
+      fill: `hsl(${p.hue} 70% ${86 - j * 2}%)`,
+      rot: 60 * j * spread
+    });
+  }
+  for (let j = 0; j < 6; j++) {
+    const a = ((60 * j + 20) * Math.PI) / 180;
+    const len = L * 0.4;
+    parts.push({
+      t: 'path',
+      d: `M 0 0 L ${n(Math.sin(a) * len * 0.4)} ${n(-Math.cos(a) * len)}`,
+      stroke: 'hsl(42 70% 72%)',
+      sw: 0.9
+    });
+    parts.push({
+      t: 'circle',
+      cx: Math.sin(a) * len * 0.45,
+      cy: -Math.cos(a) * len * 1.06,
+      r: 1.5,
+      fill: 'hsl(34 74% 50%)'
+    });
+  }
+  parts.push({ t: 'circle', r: 2.2, fill: 'hsl(44 76% 80%)' });
+  return parts;
+}
+
+/* ── API pública ────────────────────────────────────────────── */
+
+/**
+ * lod ∈ (0,1] — nivel de detalle. 1 = plano frontal, valores menores
+ * reducen pétalos y flósculos en los planos de fondo, donde no se nota.
+ */
+function buildFlower(species, params, tau = 1, lod = 1) {
+  const t = Math.max(0.001, Math.min(1, tau));
+  const d = Math.max(0.08, Math.min(1, lod));
+  if (species === 'gerbera') return gerbera(params, t, d);
+  if (species === 'hortensia') return hortensia(params, t, d);
+  if (species === 'tulipan') return tulipan(params, t);
+  return lirio(params, t);
+}
+
+const PLANE_LOD = [0.30, 0.60, 1.00];
+
+function formulaFor(species, p, tau = 1) {
+  const r = (v, d = 2) => Number(v).toFixed(d);
+  switch (species) {
+    case 'gerbera':
+      return [
+        'r(θ) = ( |cos(pθ/4)/a|^n₂ + |sin(pθ/4)/b|^n₃ )^(−1/n₁)',
+        `p = ${p.p},  n₁ = ${p.n1},  n₂ = n₃ = ${p.n2}`,
+        'x(u) = w·sin(π·u^0.8),   y(u) = −L·u',
+        `n = ${p.n},  L = ${r(p.L, 1)},  w = ${r(p.w)}`,
+        `disco:  ρᵢ = c√i,  θᵢ = i·ψ,  ψ = ${r(PSI_DEG, 5)}°`,
+        `τ = ${r(tau)}`
+      ];
+    case 'hortensia':
+      return [
+        'corimbo:  ρᵢ = c√i,   θᵢ = i·ψ',
+        `ψ = ${r(PSI_DEG, 5)}°,  N = ${p.N},  R = ${r(p.R, 1)}`,
+        'flósculo:  r(θ) = a·cos(2θ)',
+        `a = ${r(p.a)}`,
+        'sᵢ = s₀(1 − 0.35·(ρᵢ/R)²)',
+        `τ = ${r(tau)}`
+      ];
+    case 'tulipan':
+      return [
+        'B(t) = (1−t)³P₀ + 3(1−t)²t·P₁ + 3(1−t)t²·P₂ + t³P₃',
+        'α(τ) = α₀ + τ(α₁ − α₀)',
+        `α₀ = ${p.a0}°,  α₁ = ${r(p.a1, 1)}°,  α = ${r(p.a0 + tau * (p.a1 - p.a0), 1)}°`,
+        `L = ${r(p.L, 1)},  w = ${r(p.w, 1)}`,
+        '6 tépalos, 2 verticilos desfasados 60°',
+        `τ = ${r(tau)}`
+      ];
+    default:
+      return [
+        'x(u) = w·sin(πu)·(1 − βu)',
+        'y(u) = −L·u + c·u³',
+        `β = ${r(p.beta)},  c = ${r(p.c)}·L,  u ∈ [0,1]`,
+        `L = ${r(p.L, 1)},  w = ${r(p.w, 1)}`,
+        `envolvente: p = ${p.p}, n₁ = ${p.n1}, n₂ = n₃ = ${p.n2}`,
+        `τ = ${r(tau)}`
+      ];
+  }
+}
+
+/** Composición completa del ramo hasta el mes `months`. */
+function buildBouquet(seed, months, opts = {}) {
+  const c = opts.c ?? 44;
+  const kappa = opts.kappa ?? 0.82;
+  const pieces = [];
+  for (let m = 1; m <= months; m++) {
+    const species = speciesForMonth(seed, m);
+    const rnd = rngFor(seed, 'm' + m);
+    const params = paramsFor(species, rnd);
+    const pos = placement(m, { c, kappa });
+    pieces.push({
+      m,
+      species,
+      params,
+      pos,
+      lod: PLANE_LOD[pos.plane],
+      tilt: (rnd() - 0.5) * 18,
+      phase: 2 * Math.PI * ((m * PHI) % 1),
+      period: 6 + rnd() * 3
+    });
+  }
+  pieces.sort((a, b) => a.pos.plane - b.pos.plane || b.pos.rho - a.pos.rho);
+  return pieces;
+}
+
+/** Encuadre que contiene todo el ramo. La cámara se abre; las flores no se mueven. */
+function bouquetBounds(pieces, opts = {}) {
+  const pad = opts.pad ?? 70;
+  let x0 = 0, x1 = 0, y0 = 0, y1 = 0;
+  for (const pc of pieces) {
+    const r = (pc.params.L || pc.params.R || 40) * pc.pos.scale * 1.2;
+    x0 = Math.min(x0, pc.pos.x - r); x1 = Math.max(x1, pc.pos.x + r);
+    y0 = Math.min(y0, pc.pos.y - r); y1 = Math.max(y1, pc.pos.y + r);
+  }
+  const crownW = Math.max(1, x1 - x0);
+  const crownH = Math.max(1, y1 - y0);
+  const stem = (opts.stem ?? 0.58) * Math.max(130, crownH);
+  const baseY = y1 + stem;
+  return {
+    x: x0 - pad,
+    y: y0 - pad,
+    w: (x1 - x0) + pad * 2,
+    h: crownH + stem + pad * 1.35,
+    baseY,
+    tieY: y1 + stem * 0.46,
+    crown: { x0, x1, y0, y1, w: crownW, h: crownH }
+  };
+}
+
+/* foliage.js */
+/**
+ * abs<3 — follaje y envoltura
+ * Todo se deriva de la misma semilla que las flores, así que el follaje
+ * tampoco cambia nunca al recargar.
+ */
+
+const fmt = (v) => (Math.round(v * 100) / 100).toString();
+
+/* ── Tallo: Bézier cuadrática de la base a la flor ──────────── */
+
+function stemFor(pc, baseY) {
+  const p0 = [0, baseY];
+  const p1 = [pc.pos.x * 0.42, (baseY + pc.pos.y) * 0.55];
+  const p2 = [pc.pos.x, pc.pos.y];
+  const at = (t) => {
+    const u = 1 - t;
+    return [
+      u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0],
+      u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1]
+    ];
+  };
+  const tangent = (t) => {
+    const dx = 2 * (1 - t) * (p1[0] - p0[0]) + 2 * t * (p2[0] - p1[0]);
+    const dy = 2 * (1 - t) * (p1[1] - p0[1]) + 2 * t * (p2[1] - p1[1]);
+    return (Math.atan2(dy, dx) * 180) / Math.PI + 90;
+  };
+  return {
+    d: `M ${fmt(p0[0])} ${fmt(p0[1])} Q ${fmt(p1[0])} ${fmt(p1[1])} ${fmt(p2[0])} ${fmt(p2[1])}`,
+    at,
+    tangent
+  };
+}
+
+/* ── Hoja: x(u) = w·sin(π·u^0.7)·(1 − 0.12u) + κ·L·u² ──────── */
+
+function leafPath(L, w, bend, steps = 16) {
+  const right = [], left = [];
+  for (let i = 0; i <= steps; i++) {
+    const u = i / steps;
+    const half = w * Math.sin(Math.PI * Math.pow(u, 0.7)) * (1 - 0.12 * u);
+    const drift = bend * L * u * u * 0.35;
+    right.push([drift + half, -L * u]);
+    left.push([drift - half, -L * u]);
+  }
+  let d = 'M ' + fmt(right[0][0]) + ' ' + fmt(right[0][1]);
+  for (let i = 1; i < right.length; i++) d += ' L ' + fmt(right[i][0]) + ' ' + fmt(right[i][1]);
+  for (let i = left.length - 1; i >= 0; i--) d += ' L ' + fmt(left[i][0]) + ' ' + fmt(left[i][1]);
+  return d + ' Z';
+}
+
+function midribPath(L, bend) {
+  return `M 0 0 Q ${fmt(bend * L * 0.14)} ${fmt(-L * 0.5)} ${fmt(bend * L * 0.35)} ${fmt(-L * 0.92)}`;
+}
+
+/* ── Brote ──────────────────────────────────────────────────── */
+
+function budPath(L, w) {
+  return `M 0 0 C ${fmt(-w)} ${fmt(-L * 0.28)} ${fmt(-w)} ${fmt(-L * 0.78)} 0 ${fmt(-L)} ` +
+         `C ${fmt(w)} ${fmt(-L * 0.78)} ${fmt(w)} ${fmt(-L * 0.28)} 0 0 Z`;
+}
+
+/* ── Follaje completo del ramo ──────────────────────────────── */
+
+const GREEN = (plane, shift = 0) =>
+  `hsl(${155 + shift} ${42 + plane * 6}% ${13 + plane * 7}%)`;
+const VEIN = (plane) => `hsl(158 40% ${26 + plane * 10}%)`;
+
+function buildFoliage(seed, pieces, baseY, opts = {}) {
+  const back = [], front = [];
+  const density = opts.density ?? 1;
+  const spacing = opts.spacing ?? 44;
+
+  for (const pc of pieces) {
+    const rnd = rngFor(seed, 'foliage' + pc.m);
+    const stem = stemFor(pc, baseY);
+    const bucket = pc.pos.plane === 0 ? back : front;
+    const s = pc.pos.scale;
+
+    // Hojas prendidas al tallo, alternadas a izquierda y derecha
+    const leaves = 1 + Math.round(rnd() * 1.6 * density);
+    for (let k = 0; k < leaves; k++) {
+      const t = 0.34 + 0.3 * k + rnd() * 0.12;
+      if (t > 0.86) continue;
+      const [lx, ly] = stem.at(t);
+      const side = k % 2 === 0 ? 1 : -1;
+      const rot = stem.tangent(t) + side * (32 + rnd() * 20);
+      const L = (34 + rnd() * 18) * s;
+      const w = L * (0.26 + rnd() * 0.07);
+      const bend = side * (0.3 + rnd() * 0.4);
+      bucket.push({ t: 'path', d: leafPath(L, w, bend), fill: GREEN(pc.pos.plane, (k % 3) * 3), tx: lx, ty: ly, rot, m: pc.m, kind: 'leaf' });
+      if (pc.pos.plane > 0) {
+        bucket.push({ t: 'path', d: midribPath(L, bend), stroke: VEIN(pc.pos.plane), sw: 0.6, tx: lx, ty: ly, rot, m: pc.m, kind: 'leaf' });
+      }
+    }
+
+    // Brote en uno de cada tres meses
+    if (pc.m % 3 === 1) {
+      const t = 0.72 + rnd() * 0.12;
+      const [bx, by] = stem.at(t);
+      const rot = stem.tangent(t) + (rnd() - 0.5) * 46;
+      const L = (16 + rnd() * 9) * s;
+      front.push({ t: 'path', d: budPath(L, L * 0.3), fill: `hsl(${340 + rnd() * 12} 58% 42%)`, tx: bx, ty: by, rot, m: pc.m, kind: 'leaf' });
+      front.push({ t: 'path', d: budPath(L * 0.62, L * 0.16), fill: 'hsl(344 78% 66%)', o: 0.55, tx: bx, ty: by, rot, m: pc.m, kind: 'leaf' });
+    }
+  }
+
+  // Ramitas de relleno en los huecos: mismo ángulo áureo, medio paso corrido
+  const sprigs = Math.max(3, Math.round(pieces.length * 0.55 * density));
+  for (let i = 1; i <= sprigs; i++) {
+    const rnd = rngFor(seed, 'sprig' + i);
+    const theta = (i + 0.5) * PSI;
+    const rho = spacing * Math.sqrt(i + 0.5) * 1.08;
+    const x = rho * Math.cos(theta);
+    const y = -0.72 * rho * Math.sin(theta);
+    const rot = (Math.atan2(y, x) * 180) / Math.PI + 90 + (rnd() - 0.5) * 30;
+    const len = 46 + rnd() * 26;
+    const bucket = i % 3 === 0 ? front : back;
+    bucket.push({
+      t: 'path',
+      d: `M 0 0 Q ${fmt(len * 0.12)} ${fmt(-len * 0.55)} ${fmt(len * 0.1)} ${fmt(-len)}`,
+      stroke: GREEN(1, 0), sw: 1.3, tx: x, ty: y, rot
+    });
+    const leaflets = 6 + Math.floor(rnd() * 3);
+    for (let k = 1; k <= leaflets; k++) {
+      const u = k / (leaflets + 1);
+      const lx = x + Math.sin((rot * Math.PI) / 180) * 0 + 0;
+      const side = k % 2 === 0 ? 1 : -1;
+      bucket.push({
+        t: 'path',
+        d: leafPath(9 - u * 3, 3.4 - u, side * 0.4),
+        fill: GREEN(i % 3 === 0 ? 2 : 0, 4),
+        tx: x + (len * 0.1 * u) * Math.cos((rot * Math.PI) / 180) - side * 3,
+        ty: y - len * u,
+        rot: rot + side * 52
+      });
+      void lx;
+    }
+  }
+
+  // Destellos: pétalos diminutos en el perímetro
+  const sparks = Math.round(pieces.length * 1.4 * density);
+  for (let i = 1; i <= sparks; i++) {
+    const rnd = rngFor(seed, 'spark' + i);
+    const theta = (i + 0.31) * PSI;
+    const rho = spacing * Math.sqrt(i) * (1.02 + rnd() * 0.24);
+    front.push({
+      t: 'circle',
+      cx: rho * Math.cos(theta),
+      cy: -0.72 * rho * Math.sin(theta),
+      r: 1 + rnd() * 1.1,
+      fill: rnd() > 0.5 ? 'hsl(330 100% 92%)' : 'hsl(258 100% 90%)',
+      o: 0.35 + rnd() * 0.4
+    });
+  }
+
+  return { back, front };
+}
+
+/* wrapping.js */
+/**
+ * abs<3 — envoltura orgánica y lazo
+ * Geometría ligera, proporcional a la copa y sin filtros SVG costosos.
+ */
+
+const fmtWrap = (v) => (Math.round(v * 100) / 100).toString();
+const clampWrap = (x, min, max) => Math.max(min, Math.min(max, x));
+
+const pathPart = (d, fill, o = 1) => ({ t: 'path', d, fill, o });
+
+function buildWrapping(bounds) {
+  const crown = bounds.crown;
+  const anchorX = (crown.x0 + crown.x1) / 2;
+  const anchorY = bounds.tieY;
+  const shoulder = clampWrap(crown.w * 0.48, 92, 310);
+  const rise = Math.max(58, anchorY - crown.y1 + crown.h * 0.08);
+  const tail = Math.max(62, bounds.baseY - anchorY + 14);
+  const foot = clampWrap(crown.w * 0.095, 24, 54);
+  const bowW = clampWrap(crown.w * 0.16, 48, 92);
+  const bowH = bowW * 0.44;
+
+  const n = (v) => fmtWrap(v);
+
+  const backLeft =
+    `M 0 4 C ${n(-shoulder * 0.18)} ${n(-rise * 0.18)} ` +
+    `${n(-shoulder * 0.72)} ${n(-rise * 0.88)} ${n(-shoulder)} ${n(-rise)} ` +
+    `C ${n(-shoulder * 0.78)} ${n(-rise * 1.08)} ${n(-shoulder * 0.42)} ${n(-rise * 0.82)} ` +
+    `${n(-shoulder * 0.22)} ${n(-rise * 0.52)} C ${n(-shoulder * 0.08)} ${n(-rise * 0.28)} -8 -4 0 4 Z`;
+  const backRight =
+    `M 0 4 C ${n(shoulder * 0.18)} ${n(-rise * 0.18)} ` +
+    `${n(shoulder * 0.72)} ${n(-rise * 0.88)} ${n(shoulder)} ${n(-rise)} ` +
+    `C ${n(shoulder * 0.78)} ${n(-rise * 1.08)} ${n(shoulder * 0.42)} ${n(-rise * 0.82)} ` +
+    `${n(shoulder * 0.22)} ${n(-rise * 0.52)} C ${n(shoulder * 0.08)} ${n(-rise * 0.28)} 8 -4 0 4 Z`;
+
+  const frontLeft =
+    `M 2 0 C ${n(-shoulder * 0.2)} ${n(-rise * 0.12)} ${n(-shoulder * 0.62)} ${n(-rise * 0.62)} ` +
+    `${n(-shoulder * 0.9)} ${n(-rise * 0.8)} C ${n(-shoulder * 0.76)} ${n(-rise * 0.3)} ` +
+    `${n(-shoulder * 0.42)} ${n(-rise * 0.02)} ${n(-foot)} ${n(tail)} L 0 ${n(tail * 0.78)} Z`;
+  const frontRight =
+    `M -2 0 C ${n(shoulder * 0.2)} ${n(-rise * 0.12)} ${n(shoulder * 0.62)} ${n(-rise * 0.62)} ` +
+    `${n(shoulder * 0.9)} ${n(-rise * 0.8)} C ${n(shoulder * 0.76)} ${n(-rise * 0.3)} ` +
+    `${n(shoulder * 0.42)} ${n(-rise * 0.02)} ${n(foot)} ${n(tail)} L 0 ${n(tail * 0.78)} Z`;
+
+  const leftLoop =
+    `M -3 0 C ${n(-bowW * 0.24)} ${n(-bowH)} ${n(-bowW * 0.92)} ${n(-bowH * 1.04)} ` +
+    `${n(-bowW)} ${n(-bowH * 0.12)} C ${n(-bowW * 0.9)} ${n(bowH * 0.72)} ` +
+    `${n(-bowW * 0.3)} ${n(bowH * 0.5)} -3 0 Z`;
+  const rightLoop =
+    `M 3 0 C ${n(bowW * 0.24)} ${n(-bowH)} ${n(bowW * 0.92)} ${n(-bowH * 1.04)} ` +
+    `${n(bowW)} ${n(-bowH * 0.12)} C ${n(bowW * 0.9)} ${n(bowH * 0.72)} ` +
+    `${n(bowW * 0.3)} ${n(bowH * 0.5)} 3 0 Z`;
+  const leftRibbon =
+    `M -8 6 C ${n(-bowW * 0.18)} ${n(tail * 0.2)} ${n(-bowW * 0.28)} ${n(tail * 0.48)} ` +
+    `${n(-bowW * 0.48)} ${n(tail * 0.72)} L ${n(-bowW * 0.2)} ${n(tail * 0.63)} ` +
+    `C ${n(-bowW * 0.08)} ${n(tail * 0.38)} -3 ${n(tail * 0.16)} -1 8 Z`;
+  const rightRibbon =
+    `M 8 6 C ${n(bowW * 0.18)} ${n(tail * 0.2)} ${n(bowW * 0.28)} ${n(tail * 0.48)} ` +
+    `${n(bowW * 0.48)} ${n(tail * 0.72)} L ${n(bowW * 0.2)} ${n(tail * 0.63)} ` +
+    `C ${n(bowW * 0.08)} ${n(tail * 0.38)} 3 ${n(tail * 0.16)} 1 8 Z`;
+
+  return {
+    anchorX,
+    anchorY,
+    back: [
+      pathPart(backLeft, 'hsl(330 34% 19%)', 0.72),
+      pathPart(backRight, 'hsl(276 30% 20%)', 0.72)
+    ],
+    front: [
+      pathPart(frontLeft, 'hsl(338 42% 27%)', 0.84),
+      pathPart(frontRight, 'hsl(288 34% 26%)', 0.84)
+    ],
+    bow: [
+      pathPart(leftRibbon, 'hsl(340 60% 37%)', 0.94),
+      pathPart(rightRibbon, 'hsl(329 66% 43%)', 0.94),
+      pathPart(leftLoop, 'hsl(340 65% 45%)', 1),
+      pathPart(rightLoop, 'hsl(329 70% 50%)', 1),
+      { t: 'circle', cx: 0, cy: 0, r: bowH * 0.38, fill: 'hsl(344 68% 38%)', o: 1 }
+    ],
+    glow: [
+      { t: 'circle', cx: 0, cy: 0, r: bowW * 1.08, fill: 'none', stroke: 'hsl(48 100% 88%)', sw: 1.5, o: 1 }
+    ]
+  };
+}
+
+/* motion.js */
+/**
+ * abs<3 — movimiento
+ * Un solo parámetro τ manda sobre todo: tallo, hojas y apertura de pétalos.
+ * τ = 0 → capullo cerrado, tallo sin dibujar.
+ * τ = 1 → estado actual de la flor.
+ */
+
+const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeInOut = (x) =>
+  x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+
+/**
+ * Despertar: todas las piezas crecen en orden cronológico, escalonadas.
+ * La ventana total se mantiene acotada aunque el ramo tenga cien meses:
+ * el desfase se comprime, no se alarga la espera.
+ */
+function awakenSchedule(pieces, opts = {}) {
+  const count = pieces.length;
+  const window = opts.window ?? 4;
+  const maxStagger = opts.maxStagger ?? 0.24;
+  const stagger = count > 1 ? Math.min(maxStagger, window / (count - 1)) : 0;
+  const dur = opts.dur ?? 1.65;
+  const map = new Map();
+  [...pieces].sort((a, b) => a.m - b.m).forEach((p, i) => {
+    map.set(p.m, { delay: i * stagger, dur });
+  });
+  return { map, stagger, dur, total: (count - 1) * stagger + dur };
+}
+
+/** Crecimiento mensual: una sola pieza, más lenta y con más presencia. */
+function growthSchedule(pieces, m, opts = {}) {
+  const dur = opts.dur ?? 2.8;
+  const map = new Map();
+  for (const p of pieces) map.set(p.m, p.m === m ? { delay: 0, dur } : null);
+  return { map, dur, total: dur, only: m };
+}
+
+function progressFor(t, slot) {
+  if (slot === undefined) return 1;
+  if (slot === null) return 1;
+  return clamp01((t - slot.delay) / slot.dur);
+}
+
+function tauFor(t, slot) {
+  return easeInOut(progressFor(t, slot));
+}
+
+/**
+ * Presentación de la flor nueva.
+ * La corola acompaña la punta viva del tallo, se eleva un instante y termina
+ * exactamente en su posición definitiva. El destello no usa filtros SVG para
+ * mantener el movimiento fluido en Safari/iPhone.
+ */
+function presentationMotion(progress, opts = {}) {
+  const p = clamp01(progress);
+  const lift = opts.lift ?? 18;
+  const glintPhase = clamp01((p - 0.48) / 0.52);
+  return {
+    liftY: -lift * Math.sin(Math.PI * p),
+    scale: 0.72 + 0.28 * easeOut(p) + 0.08 * Math.sin(Math.PI * p),
+    glint: Math.pow(Math.sin(Math.PI * glintPhase), 1.7),
+    glintScale: 0.72 + 0.48 * glintPhase
+  };
+}
+
+/** Despliegue de la envoltura; en el mes nuevo solo respira el lazo. */
+function wrappingMotion(progress, monthly = false) {
+  const p = clamp01(progress);
+  if (monthly) {
+    const pulse = Math.sin(Math.PI * p);
+    return {
+      paperOpacity: 1,
+      paperScaleX: 1,
+      paperScaleY: 1,
+      paperY: 0,
+      bowOpacity: 1,
+      bowScale: 1 + 0.1 * pulse,
+      bowRot: 2.5 * Math.sin(2 * Math.PI * p) * pulse,
+      glow: 0.58 * pulse
+    };
+  }
+  const paper = easeOut(clamp01((p - 0.08) / 0.5));
+  const bow = easeOut(clamp01((p - 0.54) / 0.3));
+  return {
+    paperOpacity: paper,
+    paperScaleX: 0.64 + 0.36 * paper,
+    paperScaleY: 0.38 + 0.62 * paper,
+    paperY: 18 * (1 - paper),
+    bowOpacity: bow,
+    bowScale: 0.42 + 0.58 * bow,
+    bowRot: -8 * (1 - bow),
+    glow: 0.5 * Math.pow(Math.sin(Math.PI * bow), 2)
+  };
+}
+
+/** Respiración ambiental. Fases irracionalmente separadas: nunca se repite. */
+function ambient(t, piece) {
+  const s = Math.sin((2 * Math.PI * t) / piece.period + piece.phase);
+  return { rot: 1.5 * s, scale: 1 + 0.012 * s };
+}
+
+/** Despliegue de la hoja: gira hacia su posición final y crece desde el tallo. */
+function leafUnfold(tau) {
+  return { rotOffset: -46 * (1 - tau), scale: 0.15 + 0.85 * tau };
+}
+
+/** Las ramitas y destellos entran al final, cuando el ramo ya está armado. */
+function looseOpacity(t, total) {
+  return clamp01((t - total * 0.55) / (total * 0.45));
+}
+
+/* bouquet-scene.js */
+const DEFAULT_SEED = 'a3f1c07d';
+const DEFAULT_SPACING = 44;
+
+function partToSVG(part) {
+  const transforms = [];
+  if (part.tx || part.ty) transforms.push(`translate(${part.tx || 0} ${part.ty || 0})`);
+  if (part.rot) transforms.push(`rotate(${part.rot})`);
+  if (part.sc != null) transforms.push(`scale(${part.sc})`);
+  const transform = transforms.length ? ` transform="${transforms.join(' ')}"` : '';
+  const opacity = part.o != null ? ` opacity="${part.o}"` : '';
+  const stroke = part.stroke
+    ? ` stroke="${part.stroke}" stroke-width="${part.sw || 1}" stroke-linecap="round"`
+    : '';
+  if (part.t === 'circle') {
+    return `<circle cx="${part.cx || 0}" cy="${part.cy || 0}" r="${part.r}" fill="${part.fill || 'none'}"${stroke}${opacity}${transform}/>`;
+  }
+  return `<path d="${part.d}" fill="${part.fill || 'none'}"${stroke}${opacity}${transform}/>`;
+}
+
+function flowerSVG(piece, tau) {
+  return buildFlower(piece.species, piece.params, tau, piece.lod).map(partToSVG).join('');
+}
+
+function arrivalGlintSVG(piece) {
+  const radius = Math.max(34, (piece.params.L || piece.params.R || 40) * 1.28);
+  const inner = (radius * 0.68).toFixed(1);
+  const outer = radius.toFixed(1);
+  return `<circle r="${inner}" fill="none" stroke="hsl(48 100% 88%)" stroke-width="1.5"/>` +
+    `<circle r="${outer}" fill="none" stroke="hsl(326 100% 88%)" stroke-width="1" stroke-dasharray="3 8"/>` +
+    `<path d="M 0 ${-radius * 1.22} L 0 ${-radius * 0.74} M 0 ${radius * 0.74} L 0 ${radius * 1.22} ` +
+    `M ${-radius * 1.22} 0 L ${-radius * 0.74} 0 M ${radius * 0.74} 0 L ${radius * 1.22} 0" ` +
+    `fill="none" stroke="hsl(50 100% 94%)" stroke-width="2" stroke-linecap="round"/>`;
+}
+
+function curveLength(curve, steps = 36) {
+  let total = 0;
+  let previous = curve.at(0);
+  for (let index = 1; index <= steps; index += 1) {
+    const point = curve.at(index / steps);
+    total += Math.hypot(point[0] - previous[0], point[1] - previous[1]);
+    previous = point;
+  }
+  return total;
+}
+
+function createBouquetScene(svg, options = {}) {
+  const spacing = options.spacing ?? DEFAULT_SPACING;
+  const kappa = options.kappa ?? 0.82;
+  const onStatus = options.onStatus ?? (() => {});
+  let seed = options.seed || DEFAULT_SEED;
+  let months = Math.max(0, Math.floor(Number(options.months) || 0));
+  let bouquet = [];
+  let scene = null;
+  let animation = null;
+  let frameId = null;
+  let destroyed = false;
+  let reducedMotion = Boolean(options.reducedMotion);
+
+  function cancelAnimation() {
+    if (animation?.resolve) animation.resolve(false);
+    animation = null;
+  }
+
+  function rebuild() {
+    bouquet = buildBouquet(seed, months, { c: spacing, kappa });
+  }
+
+  function render() {
+    if (!bouquet.length) {
+      svg.setAttribute('viewBox', '-180 -220 360 480');
+      svg.innerHTML = '<rect x="-180" y="-220" width="360" height="480" fill="transparent"/>';
+      scene = null;
+      return;
+    }
+
+    const bounds = bouquetBounds(bouquet, { pad: 38, stem: 0.42 });
+    const foliage = buildFoliage(seed, bouquet, bounds.baseY, {
+      spacing,
+      density: 0.88
+    });
+    const wrapping = buildWrapping(bounds);
+    const byMonth = new Map();
+    const loose = [];
+    for (const part of [...foliage.back, ...foliage.front]) {
+      if (part.m == null) {
+        loose.push(part);
+        continue;
+      }
+      if (!byMonth.has(part.m)) byMonth.set(part.m, []);
+      byMonth.get(part.m).push(part);
+    }
+
+    svg.setAttribute(
+      'viewBox',
+      `${bounds.x.toFixed(1)} ${bounds.y.toFixed(1)} ${bounds.w.toFixed(1)} ${bounds.h.toFixed(1)}`
+    );
+    const strokeScale = Math.max(0.72, bounds.w / 620);
+    const planeOpacity = [0.62, 0.84, 1];
+    let html = `<rect x="${bounds.x}" y="${bounds.y}" width="${bounds.w}" height="${bounds.h}" fill="transparent"/>`;
+    html += `<g data-layer="wrap-back" transform="translate(${wrapping.anchorX} ${wrapping.anchorY})">${wrapping.back.map(partToSVG).join('')}</g>`;
+    html += `<g data-layer="loose" opacity="0.5">${loose.map(partToSVG).join('')}</g>`;
+    html += '<g data-layer="pieces">';
+    for (const piece of bouquet) {
+      const stem = stemFor(piece, bounds.baseY);
+      const leaves = (byMonth.get(piece.m) || []).map(partToSVG).join('');
+      html += `<g class="bouquet-piece" data-month="${piece.m}" opacity="${planeOpacity[piece.pos.plane]}">` +
+        `<path class="bouquet-stem" d="${stem.d}" fill="none" stroke="hsl(158 48% ${14 + piece.pos.plane * 6}%)" stroke-width="${((2.2 + piece.pos.plane * 0.7) * strokeScale).toFixed(2)}"/>` +
+        `<g class="bouquet-leaves">${leaves}</g>` +
+        `<g class="bouquet-head" transform="translate(${piece.pos.x} ${piece.pos.y}) scale(${piece.pos.scale}) rotate(${piece.tilt})">${flowerSVG(piece, 1)}</g>` +
+        `<g class="bouquet-glint" opacity="0" aria-hidden="true" transform="translate(${piece.pos.x} ${piece.pos.y}) scale(${piece.pos.scale})">${arrivalGlintSVG(piece)}</g>` +
+        '</g>';
+    }
+    html += '</g>';
+    html += `<g data-layer="wrap-front" transform="translate(${wrapping.anchorX} ${wrapping.anchorY})">${wrapping.front.map(partToSVG).join('')}</g>`;
+    html += `<g data-layer="wrap-glow" opacity="0" transform="translate(${wrapping.anchorX} ${wrapping.anchorY})">${wrapping.glow.map(partToSVG).join('')}</g>`;
+    html += `<g data-layer="wrap-bow" transform="translate(${wrapping.anchorX} ${wrapping.anchorY})">${wrapping.bow.map(partToSVG).join('')}</g>`;
+    html += '<g data-layer="presentation"></g>';
+    svg.innerHTML = html;
+
+    scene = {
+      loose: svg.querySelector('[data-layer="loose"]'),
+      piecesLayer: svg.querySelector('[data-layer="pieces"]'),
+      presentationLayer: svg.querySelector('[data-layer="presentation"]'),
+      wrapping: {
+        anchorX: wrapping.anchorX,
+        anchorY: wrapping.anchorY,
+        back: svg.querySelector('[data-layer="wrap-back"]'),
+        front: svg.querySelector('[data-layer="wrap-front"]'),
+        bow: svg.querySelector('[data-layer="wrap-bow"]'),
+        glow: svg.querySelector('[data-layer="wrap-glow"]')
+      },
+      items: []
+    };
+
+    for (const group of svg.querySelectorAll('.bouquet-piece')) {
+      const month = Number(group.dataset.month);
+      const piece = bouquet.find((candidate) => candidate.m === month);
+      const stemElement = group.querySelector('.bouquet-stem');
+      const stemGeometry = stemFor(piece, bounds.baseY);
+      const length = curveLength(stemGeometry);
+      stemElement.setAttribute('stroke-dasharray', length.toFixed(1));
+      const leaves = [...group.querySelectorAll('.bouquet-leaves > *')].map((element, index) => ({
+        element,
+        tx: (byMonth.get(month) || [])[index]?.tx ?? 0,
+        ty: (byMonth.get(month) || [])[index]?.ty ?? 0,
+        rotation: (byMonth.get(month) || [])[index]?.rot ?? 0
+      }));
+      scene.items.push({
+        piece,
+        group,
+        stem: stemElement,
+        stemGeometry,
+        length,
+        leaves,
+        head: group.querySelector('.bouquet-head'),
+        glint: group.querySelector('.bouquet-glint'),
+        lastTau: 1,
+        nextGeneration: 0
+      });
+    }
+    applyFrame(performance.now() / 1000);
+  }
+
+  function applyFrame(now) {
+    if (!scene || destroyed) return;
+    const elapsed = animation ? now - animation.startedAt : Infinity;
+    if (animation && elapsed > animation.schedule.total + 0.32) {
+      const finished = animation;
+      animation = null;
+      if (finished.schedule.only != null) {
+        for (const item of scene.items) scene.piecesLayer.append(item.group);
+        onStatus({ kind: 'month', month: finished.schedule.only, progress: 1, done: true });
+      } else {
+        onStatus({ kind: 'awaken', progress: 1, done: true });
+      }
+      if (finished.resolve) finished.resolve(true);
+    }
+
+    const wrapProgress = animation
+      ? clamp01(elapsed / Math.max(animation.schedule.total, 0.001))
+      : 1;
+    const wrapState = wrappingMotion(wrapProgress, Boolean(animation?.schedule.only != null));
+    const paperTransform =
+      `translate(${scene.wrapping.anchorX} ${(scene.wrapping.anchorY + wrapState.paperY).toFixed(2)}) ` +
+      `scale(${wrapState.paperScaleX.toFixed(4)} ${wrapState.paperScaleY.toFixed(4)})`;
+    scene.wrapping.back.setAttribute('opacity', wrapState.paperOpacity.toFixed(3));
+    scene.wrapping.front.setAttribute('opacity', wrapState.paperOpacity.toFixed(3));
+    scene.wrapping.back.setAttribute('transform', paperTransform);
+    scene.wrapping.front.setAttribute('transform', paperTransform);
+    const bowTransform =
+      `translate(${scene.wrapping.anchorX} ${scene.wrapping.anchorY}) ` +
+      `rotate(${wrapState.bowRot.toFixed(3)}) scale(${wrapState.bowScale.toFixed(4)})`;
+    scene.wrapping.bow.setAttribute('opacity', wrapState.bowOpacity.toFixed(3));
+    scene.wrapping.bow.setAttribute('transform', bowTransform);
+    scene.wrapping.glow.setAttribute('opacity', wrapState.glow.toFixed(3));
+    scene.wrapping.glow.setAttribute(
+      'transform',
+      `translate(${scene.wrapping.anchorX} ${scene.wrapping.anchorY}) scale(${(1 + wrapState.glow * 0.35).toFixed(4)})`
+    );
+
+    for (const item of scene.items) {
+      const slot = animation ? animation.schedule.map.get(item.piece.m) : undefined;
+      const progress = animation ? tauFor(elapsed, slot) : 1;
+      const presenting = Boolean(animation && animation.schedule.only === item.piece.m);
+      const arrival = presenting
+        ? presentationMotion(progress, { lift: 22 })
+        : { liftY: 0, scale: 1, glint: 0, glintScale: 1 };
+      const tip = animation && slot
+        ? item.stemGeometry.at(progress)
+        : [item.piece.pos.x, item.piece.pos.y];
+
+      item.stem.setAttribute('stroke-dashoffset', ((1 - progress) * item.length).toFixed(1));
+      const unfold = leafUnfold(progress);
+      for (const leaf of item.leaves) {
+        leaf.element.setAttribute(
+          'transform',
+          `translate(${leaf.tx} ${leaf.ty}) rotate(${(leaf.rotation + unfold.rotOffset).toFixed(2)}) scale(${unfold.scale.toFixed(3)})`
+        );
+      }
+      if (Math.abs(progress - item.lastTau) > 0.012 && now >= item.nextGeneration) {
+        item.head.innerHTML = flowerSVG(item.piece, progress);
+        item.lastTau = progress;
+        item.nextGeneration = now + 0.04;
+      }
+
+      const breathing = reducedMotion ? { rot: 0, scale: 1 } : ambient(now, item.piece);
+      const headX = tip[0];
+      const headY = tip[1] + arrival.liftY;
+      item.head.setAttribute(
+        'transform',
+        `translate(${headX.toFixed(2)} ${headY.toFixed(2)}) ` +
+        `scale(${(item.piece.pos.scale * breathing.scale * arrival.scale).toFixed(4)}) ` +
+        `rotate(${(item.piece.tilt + breathing.rot).toFixed(3)})`
+      );
+      item.glint.setAttribute('opacity', arrival.glint.toFixed(3));
+      item.glint.setAttribute(
+        'transform',
+        `translate(${headX.toFixed(2)} ${headY.toFixed(2)}) scale(${(item.piece.pos.scale * arrival.glintScale).toFixed(4)})`
+      );
+    }
+
+    scene.loose?.setAttribute(
+      'opacity',
+      (0.5 * (animation ? looseOpacity(elapsed, animation.schedule.total) : 1)).toFixed(3)
+    );
+    if (animation) {
+      onStatus({
+        kind: animation.schedule.only != null ? 'month' : 'awaken',
+        month: animation.schedule.only,
+        progress: clamp01(elapsed / Math.max(animation.schedule.total, 0.001)),
+        done: false
+      });
+    }
+  }
+
+  function loop(milliseconds) {
+    frameId = null;
+    try {
+      applyFrame(milliseconds / 1000);
+    } catch (error) {
+      console.error('abs<3 · animación', error);
+      const failed = animation;
+      animation = null;
+      failed?.resolve?.(false);
+    }
+    if (!destroyed && (animation || !reducedMotion)) startLoop();
+  }
+
+  function startLoop() {
+    if (frameId == null && !destroyed) frameId = requestAnimationFrame(loop);
+  }
+
+  function show(nextMonths, nextSeed = seed) {
+    cancelAnimation();
+    months = Math.max(0, Math.floor(Number(nextMonths) || 0));
+    seed = nextSeed || DEFAULT_SEED;
+    rebuild();
+    render();
+    if (!reducedMotion) startLoop();
+  }
+
+  function playAwakening() {
+    if (!bouquet.length || reducedMotion) return Promise.resolve(true);
+    cancelAnimation();
+    const promise = new Promise((resolve) => {
+      animation = {
+        startedAt: performance.now() / 1000,
+        schedule: awakenSchedule(bouquet, { window: 3.3, maxStagger: 0.2, dur: 1.5 }),
+        resolve
+      };
+    });
+    applyFrame(animation.startedAt);
+    startLoop();
+    return promise;
+  }
+
+  function playMonthlyArrival(nextMonth, nextSeed = seed) {
+    show(nextMonth, nextSeed);
+    if (reducedMotion) return Promise.resolve(true);
+    const promise = new Promise((resolve) => {
+      animation = {
+        startedAt: performance.now() / 1000,
+        schedule: growthSchedule(bouquet, nextMonth, { dur: 2.9 }),
+        resolve
+      };
+    });
+    const newest = scene?.items.find((item) => item.piece.m === nextMonth);
+    if (newest) scene.presentationLayer.append(newest.group);
+    applyFrame(animation.startedAt);
+    startLoop();
+    return promise;
+  }
+
+  function setReducedMotion(value) {
+    reducedMotion = Boolean(value);
+    if (reducedMotion && frameId != null) {
+      cancelAnimationFrame(frameId);
+      frameId = null;
+      applyFrame(performance.now() / 1000);
+    } else if (!reducedMotion) {
+      startLoop();
+    }
+  }
+
+  function getPiece(month) {
+    const target = Math.max(0, Math.floor(Number(month) || 0));
+    return bouquet.find((piece) => piece.m === target) || null;
+  }
+
+  function focusMonth(month) {
+    if (!scene) return false;
+    const target = Math.max(0, Math.floor(Number(month) || 0));
+    let found = false;
+    for (const item of scene.items) {
+      const selected = item.piece.m === target;
+      item.group.classList.toggle('is-selected', selected);
+      if (selected) found = true;
+    }
+    svg.classList.toggle('has-selection', found);
+    return found;
+  }
+
+  function clearFocus() {
+    if (!scene) return;
+    svg.classList.remove('has-selection');
+    for (const item of scene.items) item.group.classList.remove('is-selected');
+  }
+
+  function destroy() {
+    destroyed = true;
+    cancelAnimation();
+    if (frameId != null) cancelAnimationFrame(frameId);
+    frameId = null;
+  }
+
+  rebuild();
+  render();
+  if (!reducedMotion) startLoop();
+
+  return {
+    destroy,
+    playAwakening,
+    playMonthlyArrival,
+    setReducedMotion,
+    show,
+    getPiece,
+    focusMonth,
+    clearFocus
+  };
+}
+
+    (() => {
+      'use strict';
+
+      const CACHE_KEY = 'abs3.apps-script.official-state.v2';
+      const PERMISSION_KEY = 'abs3.notification-bud-seen.v1';
+      const SEED = 'a3f1c07d';
+      const app = document.getElementById('app');
+      const bouquetSvg = document.getElementById('bouquet');
+      const panel = document.getElementById('equationPanel');
+      const equation = document.getElementById('equation');
+      const permissionBud = document.getElementById('permissionBud');
+      const splash = document.getElementById('splash');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let controller = null;
+      let officialState = null;
+      let vigilTimer = null;
+      let unlockTimer = null;
+
+      const safeInteger = (value) => Number.isInteger(Number(value)) && Number(value) >= 0;
+
+      function validateState(value) {
+        if (!value || value.ok !== true || value.timeZone !== 'America/Merida') throw new Error('state');
+        if (!safeInteger(value.unlockedMonths) || !String(value.seed || '')) throw new Error('state');
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value.officialDate || ''))) throw new Error('state');
+        return value;
+      }
+
+      function loadCachedState() {
+        try {
+          const raw = localStorage.getItem(CACHE_KEY);
+          return raw ? validateState(JSON.parse(raw)) : null;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function saveCachedState(state) {
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify(state)); } catch (_) {}
+      }
+
+      function requestOfficialState(lastSeenMonths) {
+        return new Promise((resolve, reject) => {
+          if (!window.google || !google.script || !google.script.run) {
+            reject(new Error('apps-script-unavailable'));
+            return;
+          }
+          google.script.run
+            .withSuccessHandler((value) => {
+              try { resolve(validateState(value)); } catch (error) { reject(error); }
+            })
+            .withFailureHandler(reject)
+            .getClientState(Number(lastSeenMonths) || 0);
+        });
+      }
+
+      function localPreviewState() {
+        const localHost = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+        if (!localHost) return null;
+        const months = Math.max(1, Math.min(24, Number(new URLSearchParams(location.search).get('preview')) || 6));
+        return {
+          ok: true,
+          timeZone: 'America/Merida',
+          officialDate: '2026-09-15',
+          officialTimestamp: '2026-09-15T00:00:02-0600',
+          nextUnlockDate: '2026-10-15',
+          seed: SEED,
+          unlockedMonths: months,
+          newMonths: []
+        };
+      }
+
+      function closeEquation() {
+        panel.classList.remove('is-visible');
+        panel.setAttribute('aria-hidden', 'true');
+        app.classList.remove('panel-open');
+        controller?.clearFocus();
+      }
+
+      function equationMarkup(piece) {
+        const species = String(piece.species || '').replace('tulipan', 'tulipán');
+        const rho = Number(piece.pos.rho || 0).toFixed(2);
+        const theta = ((Number(piece.pos.theta || 0) * 180 / Math.PI) % 360 + 360) % 360;
+        return [
+          `<span class="meta">m = ${piece.m}</span> · <span class="species">${species}</span>`,
+          `ρₘ = 44√${piece.m} = ${rho}`,
+          `θₘ = ${piece.m}ψ = ${theta.toFixed(4)}°`,
+          `ψ = 137.507764°`,
+          `τ = 1.00`
+        ].join('\n');
+      }
+
+      function openEquation(month) {
+        const piece = controller?.getPiece(month);
+        if (!piece) return;
+        controller.focusMonth(month);
+        equation.innerHTML = equationMarkup(piece);
+        panel.classList.add('is-visible');
+        panel.setAttribute('aria-hidden', 'false');
+        app.classList.add('panel-open');
+      }
+
+      function bindInteractions() {
+        bouquetSvg.addEventListener('click', (event) => {
+          const group = event.target.closest('.bouquet-piece');
+          if (!group) {
+            closeEquation();
+            return;
+          }
+          openEquation(Number(group.dataset.month));
+        });
+
+        document.getElementById('bouquetStage').addEventListener('click', (event) => {
+          if (!event.target.closest('.bouquet-piece')) closeEquation();
+        });
+
+        panel.addEventListener('click', closeEquation);
+
+        permissionBud.addEventListener('click', async () => {
+          permissionBud.classList.remove('is-visible');
+          permissionBud.classList.add('is-leaving');
+          try { localStorage.setItem(PERMISSION_KEY, '1'); } catch (_) {}
+          if ('Notification' in window && Notification.permission === 'default') {
+            try { await Notification.requestPermission(); } catch (_) {}
+          }
+          setTimeout(() => {
+            permissionBud.hidden = true;
+            permissionBud.classList.remove('is-leaving');
+          }, 760);
+        });
+      }
+
+      function maybeShowPermissionBud() {
+        let seen = false;
+        try { seen = localStorage.getItem(PERMISSION_KEY) === '1'; } catch (_) {}
+        const canAsk = 'Notification' in window && Notification.permission === 'default';
+        if (seen || !canAsk) return;
+        permissionBud.hidden = false;
+        requestAnimationFrame(() => permissionBud.classList.add('is-visible'));
+      }
+
+      function clearVigilTimers() {
+        if (vigilTimer) clearTimeout(vigilTimer);
+        if (unlockTimer) clearTimeout(unlockTimer);
+        vigilTimer = null;
+        unlockTimer = null;
+      }
+
+      function scheduleVigil(state) {
+        clearVigilTimers();
+        app.classList.remove('is-vigil');
+        if (!state.officialTimestamp || !state.nextUnlockDate) return;
+        const match = String(state.officialTimestamp).match(/([+-]\d{2})(\d{2})$/);
+        if (!match) return;
+        const offset = `${match[1]}:${match[2]}`;
+        const target = Date.parse(`${state.nextUnlockDate}T00:00:00${offset}`);
+        const serverNow = Date.parse(String(state.officialTimestamp).replace(/([+-]\d{2})(\d{2})$/, '$1:$2'));
+        if (!Number.isFinite(target) || !Number.isFinite(serverNow)) return;
+        const untilUnlock = target - serverNow;
+        if (untilUnlock <= 0 || untilUnlock > 36 * 60 * 60 * 1000) return;
+        const enterVigil = () => app.classList.add('is-vigil');
+        if (untilUnlock <= 30000) enterVigil();
+        else vigilTimer = setTimeout(enterVigil, untilUnlock - 30000);
+        unlockTimer = setTimeout(() => synchronize(true), untilUnlock + 1200);
+      }
+
+      async function applyOfficialState(state, cached, fromUnlockTimer = false) {
+        const previous = cached && cached.seed === state.seed ? Number(cached.unlockedMonths) : null;
+        const delta = previous == null ? null : state.unlockedMonths - previous;
+        officialState = state;
+        closeEquation();
+
+        if (!reducedMotion.matches && previous != null && delta > 0 && delta <= 3) {
+          controller.show(previous, state.seed);
+          for (let month = previous + 1; month <= state.unlockedMonths; month += 1) {
+            await controller.playMonthlyArrival(month, state.seed);
+          }
+          if (fromUnlockTimer && 'Notification' in window && Notification.permission === 'granted') {
+            try { new Notification('abs<3', { body: 'Algo abrió esta noche…' }); } catch (_) {}
+          }
+        } else if (!cached || cached.seed !== state.seed || cached.unlockedMonths !== state.unlockedMonths) {
+          controller.show(state.unlockedMonths, state.seed);
+          if (!reducedMotion.matches && state.unlockedMonths > 0) await controller.playAwakening();
+        }
+
+        saveCachedState(state);
+        scheduleVigil(state);
+        // Fase 5.3: el capullo de permiso queda desactivado; no forma parte de la vista final.
+      }
+
+      async function synchronize(fromUnlockTimer = false) {
+        const cached = loadCachedState();
+        if (cached && !officialState) {
+          officialState = cached;
+          controller.show(cached.unlockedMonths, cached.seed);
+          if (!reducedMotion.matches) void controller.playAwakening();
+        }
+        try {
+          const state = await requestOfficialState(cached?.unlockedMonths || 0);
+          await applyOfficialState(state, cached, fromUnlockTimer);
+        } catch (_) {
+          const preview = localPreviewState();
+          if (preview) await applyOfficialState(preview, null, false);
+          else if (cached) scheduleVigil(cached);
+        }
+      }
+
+      function start() {
+        controller = createBouquetScene(bouquetSvg, {
+          months: 0,
+          seed: SEED,
+          spacing: 44,
+          kappa: .82,
+          reducedMotion: reducedMotion.matches
+        });
+        bindInteractions();
+        reducedMotion.addEventListener?.('change', (event) => controller.setReducedMotion(event.matches));
+        setTimeout(() => {
+          splash.classList.add('is-hidden');
+          setTimeout(() => splash.remove(), 260);
+        }, reducedMotion.matches ? 40 : 720);
+        void synchronize(false);
+      }
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && controller) void synchronize(false);
+      });
+
+      window.addEventListener('beforeunload', () => {
+        clearVigilTimers();
+        controller?.destroy();
+      });
+
+      start();
+    })();
+  </script>
+</body>
+</html>

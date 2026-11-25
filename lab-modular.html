@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>abs&lt;3 · laboratorio de flores</title>
+<style>
+  :root{
+    --ink:#e6e3ef; --dim:#8d8a9c; --line:#1e1e26;
+    --panel:#0d0d11; --violet:#b9b3ff; --rose:#ff8fae;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:#08080a; color:var(--ink);
+    font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    padding:24px; padding-bottom:calc(24px + env(safe-area-inset-bottom));
+  }
+  h1{font-size:17px; font-weight:500; margin:0 0 2px; letter-spacing:.01em}
+  h1 span{color:var(--dim); font-weight:400}
+  .sub{color:var(--dim); font-size:13px; margin:0 0 22px}
+  .wrap{display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:22px; max-width:1040px}
+  @media (max-width:820px){ .wrap{grid-template-columns:minmax(0,1fr)} }
+
+  .stage{background:#000; border:0.5px solid var(--line); border-radius:14px; overflow:hidden}
+  .stage svg{display:block; width:100%; height:auto}
+  .formula{
+    margin-top:12px; padding:14px 16px; border:0.5px solid var(--line); border-radius:12px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px; line-height:1.9;
+    color:var(--violet); white-space:pre-wrap; word-break:break-word; background:var(--panel);
+  }
+  .formula b{color:#efecff; font-weight:400}
+
+  .panel{border:0.5px solid var(--line); border-radius:12px; padding:16px; background:var(--panel); align-self:start}
+  .row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap}
+  button{
+    font:inherit; font-size:13px; color:var(--dim); background:transparent;
+    border:0.5px solid var(--line); border-radius:8px; padding:6px 11px; cursor:pointer;
+  }
+  button:hover{color:var(--ink); border-color:#2e2e3a}
+  button[aria-pressed="true"]{color:#0a0a0c; background:var(--violet); border-color:var(--violet)}
+  button:focus-visible{outline:2px solid var(--violet); outline-offset:2px}
+
+  label{display:block; margin:0 0 11px}
+  .lab{display:flex; justify-content:space-between; font-size:12.5px; color:var(--dim); margin-bottom:5px}
+  .lab em{font-style:normal; color:var(--violet); font-family:ui-monospace,Menlo,monospace}
+  input[type=range]{width:100%; accent-color:var(--violet); height:20px}
+  input[type=text],input[type=number],input[type=url]{
+    width:100%; font:inherit; font-size:13px; font-family:ui-monospace,Menlo,monospace;
+    background:#131318; color:var(--ink); border:0.5px solid var(--line); border-radius:8px; padding:7px 9px;
+  }
+  input:focus-visible{outline:2px solid var(--violet); outline-offset:1px}
+  .hr{height:0.5px; background:var(--line); margin:14px 0}
+  .note{font-size:12.5px; color:var(--dim); margin:14px 0 0}
+  .check{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--dim)}
+  .motion-state{
+    margin:2px 0 14px; padding:9px 10px; border:0.5px solid var(--line);
+    border-radius:9px; background:#111116; color:var(--dim); font-size:12px;
+  }
+  .motion-line{display:flex; justify-content:space-between; gap:10px; margin-bottom:6px}
+  .motion-track{height:4px; overflow:hidden; border-radius:999px; background:#24242d}
+  .motion-fill{display:block; width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--violet),var(--rose))}
+  .motion-state[data-active="true"]{color:var(--ink); border-color:#383745}
+  .api-title{font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--violet); margin-bottom:9px}
+  .api-state{padding:9px 10px; border:0.5px solid var(--line); border-radius:9px; background:#111116; color:var(--dim); font-size:12px}
+  .api-state[data-status="online"]{border-color:#285946; color:#a8e6c8}
+  .api-state[data-status="loading"]{border-color:#4a4568; color:var(--violet)}
+  .api-state[data-status="error"]{border-color:#683843; color:#ffadbe}
+  .api-meta{display:block; margin-top:3px; color:var(--dim)}
+  button:disabled{opacity:.5; cursor:wait}
+  noscript{display:block; margin:10px 0; color:#ff9bad; font-size:12px}
+</style>
+</head>
+<body>
+
+<h1>abs&lt;3 <span>· laboratorio de flores</span></h1>
+<p class="sub">Fase 4.1. Deployment enlazado, fecha oficial y siembra mensual segura.</p>
+
+<div class="wrap">
+  <div>
+    <div class="stage"><svg id="stage" viewBox="0 0 460 460" aria-label="Vista previa de la flor"></svg></div>
+    <div class="formula" id="formula"></div>
+  </div>
+
+  <div class="panel">
+    <div class="row" id="modes">
+      <button data-mode="flor" aria-pressed="true">Flor</button>
+      <button data-mode="ramo" aria-pressed="false">Ramo</button>
+    </div>
+    <div class="row" id="species">
+      <button data-sp="hortensia" aria-pressed="false">Hortensia</button>
+      <button data-sp="tulipan" aria-pressed="false">Tulipán</button>
+      <button data-sp="gerbera" aria-pressed="true">Gerbera</button>
+      <button data-sp="lirio" aria-pressed="false">Lirio</button>
+    </div>
+
+    <label>
+      <span class="lab">Semilla</span>
+      <input type="text" id="seed" value="a3f1c07d" spellcheck="false">
+    </label>
+
+    <div class="hr"></div>
+    <div id="sliders"></div>
+
+    <div class="hr"></div>
+    <div class="row" id="anim">
+      <button id="awaken">Despertar</button>
+      <button id="grow">Desbloquear mes</button>
+    </div>
+    <div class="motion-state" id="motionState" data-active="false" aria-live="polite">
+      <div class="motion-line"><span id="motionLabel">Listo para animar</span><span id="motionPercent">0%</span></div>
+      <div class="motion-track"><span class="motion-fill" id="motionFill"></span></div>
+    </div>
+    <noscript>JavaScript está bloqueado: abre ABRIR.html en Chrome, Edge o Safari.</noscript>
+    <div class="check">
+      <input type="checkbox" id="breathe"> <label for="breathe" style="margin:0">Respiración</label>
+    </div>
+    <div class="check" style="margin-top:8px">
+      <input type="checkbox" id="foliage" checked> <label for="foliage" style="margin:0">Follaje</label>
+    </div>
+    <div class="check" style="margin-top:8px">
+      <input type="checkbox" id="wrapping" checked> <label for="wrapping" style="margin:0">Envoltura y lazo</label>
+    </div>
+
+    <div class="hr"></div>
+    <div class="api-title">Fecha oficial · Fase 4</div>
+    <label>
+      <span class="lab">URL de Apps Script</span>
+      <input type="url" id="apiUrl" placeholder="https://script.google.com/macros/s/…/exec" spellcheck="false">
+    </label>
+    <div class="row">
+      <button id="syncOfficial">Sincronizar fecha oficial</button>
+    </div>
+    <div class="api-state" id="apiState" data-status="local" aria-live="polite">
+      <span id="apiLabel">Deployment @2 configurado</span>
+      <span class="api-meta" id="apiMeta">La sincronización oficial iniciará automáticamente.</span>
+    </div>
+
+    <p class="note" id="note"></p>
+  </div>
+</div>
+
+<script type="module">
+import {
+  PSI, PSI_DEG, buildFlower, formulaFor, paramsFor, rngFor,
+  speciesForMonth, buildBouquet, bouquetBounds
+} from './src/garden/flowers.js';
+import { buildFoliage, stemFor } from './src/garden/foliage.js';
+import { buildWrapping } from './src/garden/wrapping.js';
+import {
+  awakenSchedule, growthSchedule, tauFor, ambient, leafUnfold,
+  looseOpacity, presentationMotion, wrappingMotion, clamp01
+} from './src/garden/motion.js';
+import {
+  fetchOfficialState, loadApiSettings, normalizeApiUrl, saveApiSettings
+} from './src/api/official-state.js';
+
+const stage = document.getElementById('stage');
+const out = document.getElementById('formula');
+const slidersEl = document.getElementById('sliders');
+const seedEl = document.getElementById('seed');
+const breatheEl = document.getElementById('breathe');
+const noteEl = document.getElementById('note');
+const foliageEl = document.getElementById('foliage');
+const wrappingEl = document.getElementById('wrapping');
+const motionStateEl = document.getElementById('motionState');
+const motionLabelEl = document.getElementById('motionLabel');
+const motionPercentEl = document.getElementById('motionPercent');
+const motionFillEl = document.getElementById('motionFill');
+const apiUrlEl = document.getElementById('apiUrl');
+const syncOfficialEl = document.getElementById('syncOfficial');
+const apiStateEl = document.getElementById('apiState');
+const apiLabelEl = document.getElementById('apiLabel');
+const apiMetaEl = document.getElementById('apiMeta');
+const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbzcTFqq6V3N37Ged7Wl5UmuFWAKj3I82_fq0H4eCnZCOjtDZRaRipU5HmFAO2XwqQONdg/exec';
+
+const SPEC = {
+  gerbera: [
+    ['n', 'pétalos n', 10, 48, 1], ['L', 'largo L', 20, 80, 0.5],
+    ['w', 'ancho w', 1.5, 12, 0.1], ['p', 'simetría p', 4, 48, 2],
+    ['n1', 'n₁', 0.15, 1.5, 0.05], ['n2', 'n₂ = n₃', 0.6, 4, 0.1],
+    ['discN', 'disco N', 20, 200, 1], ['hue', 'matiz', 300, 360, 1]
+  ],
+  hortensia: [
+    ['N', 'flósculos N', 20, 260, 1], ['R', 'radio R', 12, 70, 0.5],
+    ['a', 'rosa a', 2, 10, 0.1], ['hue', 'matiz', 220, 290, 1]
+  ],
+  tulipan: [
+    ['L', 'largo L', 28, 100, 0.5], ['w', 'ancho w', 6, 34, 0.5],
+    ['a1', 'apertura α₁', 6, 70, 1], ['hue', 'matiz', 320, 360, 1]
+  ],
+  lirio: [
+    ['L', 'largo L', 28, 100, 0.5], ['w', 'ancho w', 4, 24, 0.5],
+    ['beta', 'β estrechado', 0, 0.95, 0.02], ['c', 'c recurva', 0, 0.8, 0.02],
+    ['n1', 'n₁ envolvente', 0.15, 1.5, 0.05], ['hue', 'matiz', 290, 350, 1]
+  ]
+};
+
+let mode = 'flor';
+let species = 'gerbera';
+let params = null;
+let tau = 1;
+let months = 6;
+let bouquet = [];
+const BOUQUET_SPACING = 44;
+
+function setMotionStatus(label, progress = 0, active = false) {
+  const p = clamp01(progress);
+  motionLabelEl.textContent = label;
+  motionPercentEl.textContent = `${Math.round(p * 100)}%`;
+  motionFillEl.style.width = `${(p * 100).toFixed(1)}%`;
+  motionStateEl.dataset.active = String(active);
+}
+
+function setApiStatus(label, meta, status = 'local') {
+  apiLabelEl.textContent = label;
+  apiMetaEl.textContent = meta;
+  apiStateEl.dataset.status = status;
+}
+
+function markLocalPreview() {
+  setApiStatus(
+    'Vista de laboratorio: cambio no oficial',
+    'Pulsa “Sincronizar fecha oficial” para restaurar el estado del servidor.',
+    'local'
+  );
+}
+
+function reseedFlower() {
+  params = paramsFor(species, rngFor(seedEl.value || 'x', 'lab-' + species));
+  buildSliders();
+}
+
+function buildSliders() {
+  slidersEl.innerHTML = '';
+  if (mode === 'ramo') {
+    addNumber('mes (sin límite)', months, (v) => { months = v; rebuildBouquet(); });
+    addSlider('__months', 'mes', 0, 120, 1, Math.min(months, 120),
+      (v) => { months = v; syncMonthField(); rebuildBouquet(); });
+    addSlider('__tau', 'τ apertura', 0.02, 1, 0.01, tau, (v) => { tau = v; });
+    return;
+  }
+  for (const [key, label, min, max, step] of SPEC[species]) {
+    addSlider(key, label, min, max, step, params[key], (v) => { params[key] = v; });
+  }
+  if (species === 'gerbera' || species === 'lirio') params.n3 = params.n2;
+  addSlider('__tau', 'τ apertura', 0.02, 1, 0.01, tau, (v) => { tau = v; });
+}
+
+let monthField = null;
+function syncMonthField() { if (monthField) monthField.value = months; }
+
+function addNumber(label, value, apply) {
+  const wrap = document.createElement('label');
+  const head = document.createElement('span');
+  head.className = 'lab';
+  head.textContent = label;
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.min = 0;
+  input.step = 1;
+  input.value = value;
+  input.addEventListener('input', () => {
+    const v = Math.max(0, Math.round(Number(input.value) || 0));
+    apply(v);
+    if (mode === 'ramo') markLocalPreview();
+    render();
+  });
+  monthField = input;
+  wrap.append(head, input);
+  slidersEl.append(wrap);
+}
+
+function addSlider(key, label, min, max, step, value, apply) {
+  const wrap = document.createElement('label');
+  const head = document.createElement('span');
+  head.className = 'lab';
+  const name = document.createElement('span');
+  name.textContent = label;
+  const val = document.createElement('em');
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.min = min; input.max = max; input.step = step; input.value = value;
+  const show = () => { val.textContent = Number(input.value).toFixed(step < 1 ? 2 : 0); };
+  show();
+  input.addEventListener('input', () => {
+    const v = Number(input.value);
+    apply(v);
+    if (key === 'n2') params.n3 = v;
+    if (mode === 'ramo' && key === '__months') markLocalPreview();
+    show();
+    render();
+  });
+  head.append(name, val);
+  wrap.append(head, input);
+  slidersEl.append(wrap);
+}
+
+function rebuildBouquet() {
+  bouquet = buildBouquet(seedEl.value || 'x', months, { c: BOUQUET_SPACING });
+}
+
+/* ── Render ─────────────────────────────────────────────── */
+
+function partToSVG(p) {
+  const tf = [];
+  if (p.tx || p.ty) tf.push(`translate(${p.tx || 0} ${p.ty || 0})`);
+  if (p.rot) tf.push(`rotate(${p.rot})`);
+  if (p.sc != null) tf.push(`scale(${p.sc})`);
+  const t = tf.length ? ` transform="${tf.join(' ')}"` : '';
+  const o = p.o != null ? ` opacity="${p.o}"` : '';
+  const stroke = p.stroke
+    ? ` stroke="${p.stroke}" stroke-width="${p.sw || 1}" stroke-linecap="round"`
+    : '';
+  if (p.t === 'circle') {
+    return `<circle cx="${p.cx || 0}" cy="${p.cy || 0}" r="${p.r}" fill="${p.fill || 'none'}"${stroke}${o}${t}/>`;
+  }
+  if (p.stroke) {
+    return `<path d="${p.d}" fill="${p.fill || 'none'}"${stroke}${o}${t}/>`;
+  }
+  return `<path d="${p.d}" fill="${p.fill}"${o}${t}/>`;
+}
+
+function flowerSVG(sp, pr, t, lod = 1) {
+  return buildFlower(sp, pr, t, lod).map(partToSVG).join('');
+}
+
+function arrivalGlintSVG(pc) {
+  const radius = Math.max(34, (pc.params.L || pc.params.R || 40) * 1.28);
+  const inner = (radius * 0.68).toFixed(1);
+  const outer = radius.toFixed(1);
+  return `<circle r="${inner}" fill="none" stroke="hsl(48 100% 88%)" stroke-width="1.5"/>` +
+    `<circle r="${outer}" fill="none" stroke="hsl(326 100% 88%)" stroke-width="1" stroke-dasharray="3 8"/>` +
+    `<path d="M 0 ${-radius * 1.22} L 0 ${-radius * 0.74} M 0 ${radius * 0.74} L 0 ${radius * 1.22} ` +
+    `M ${-radius * 1.22} 0 L ${-radius * 0.74} 0 M ${radius * 0.74} 0 L ${radius * 1.22} 0" ` +
+    `fill="none" stroke="hsl(50 100% 94%)" stroke-width="2" stroke-linecap="round"/>`;
+}
+
+function curveLength(curve, steps = 36) {
+  let total = 0;
+  let previous = curve.at(0);
+  for (let i = 1; i <= steps; i++) {
+    const point = curve.at(i / steps);
+    total += Math.hypot(point[0] - previous[0], point[1] - previous[1]);
+    previous = point;
+  }
+  return total;
+}
+
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const countNodes = () => stage.querySelectorAll('path,circle').length;
+
+let scene = null;   // referencias vivas del modo ramo
+let anim = null;    // { t0, sched }
+
+function render() {
+  if (mode === 'flor') {
+    scene = null;
+    stage.setAttribute('viewBox', '0 0 460 460');
+    stage.innerHTML =
+      `<rect width="460" height="460" fill="#000"/>` +
+      `<g class="solo" transform="translate(230 250)">${flowerSVG(species, params, tau)}</g>`;
+    out.innerHTML = formulaFor(species, params, tau)
+      .map((l, i) => (i === 0 ? `<b>${esc(l)}</b>` : esc(l))).join('\n');
+    noteEl.textContent = `${countNodes()} nodos SVG en esta flor.`;
+    return;
+  }
+  renderBouquet();
+}
+
+function renderBouquet() {
+  const seed = seedEl.value || 'x';
+  const b = bouquetBounds(bouquet);
+  const fol = foliageEl.checked
+    ? buildFoliage(seed, bouquet, b.baseY, { spacing: BOUQUET_SPACING })
+    : { back: [], front: [] };
+  const wrap = wrappingEl.checked && bouquet.length
+    ? buildWrapping(b)
+    : { anchorX: 0, anchorY: b.tieY, back: [], front: [], bow: [], glow: [] };
+
+  const byMonth = new Map();
+  const loose = [];
+  for (const part of [...fol.back, ...fol.front]) {
+    if (part.m == null) { loose.push(part); continue; }
+    if (!byMonth.has(part.m)) byMonth.set(part.m, []);
+    byMonth.get(part.m).push(part);
+  }
+
+  stage.setAttribute('viewBox', `${b.x.toFixed(1)} ${b.y.toFixed(1)} ${b.w.toFixed(1)} ${b.h.toFixed(1)}`);
+  const k = Math.max(1, b.w / 620);
+  const OP = [0.55, 0.8, 1];
+
+  let html = `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="#000"/>`;
+  html += `<g id="wrap-back" transform="translate(${wrap.anchorX} ${wrap.anchorY})">${wrap.back.map(partToSVG).join('')}</g>`;
+  html += `<g id="loose" opacity="0.5">${loose.map(partToSVG).join('')}</g>`;
+  html += `<g id="pieces-layer">`;
+  for (const pc of bouquet) {
+    const st = stemFor(pc, b.baseY);
+    const leaves = (byMonth.get(pc.m) || []).map(partToSVG).join('');
+    html += `<g class="piece" data-m="${pc.m}" opacity="${OP[pc.pos.plane]}">` +
+      `<path class="stem" d="${st.d}" fill="none" stroke="hsl(158 46% ${12 + pc.pos.plane * 6}%)" stroke-width="${((2.2 + pc.pos.plane * 0.7) * k).toFixed(2)}"/>` +
+      `<g class="leaves">${leaves}</g>` +
+      `<g class="head" transform="translate(${pc.pos.x} ${pc.pos.y}) scale(${pc.pos.scale}) rotate(${pc.tilt})">${flowerSVG(pc.species, pc.params, tau, pc.lod)}</g>` +
+      `<g class="arrival-glint" opacity="0" aria-hidden="true" transform="translate(${pc.pos.x} ${pc.pos.y}) scale(${pc.pos.scale})">${arrivalGlintSVG(pc)}</g>` +
+      `</g>`;
+  }
+  html += `</g>`;
+  html += `<g id="wrap-front" transform="translate(${wrap.anchorX} ${wrap.anchorY})">${wrap.front.map(partToSVG).join('')}</g>`;
+  html += `<g id="wrap-glow" opacity="0" transform="translate(${wrap.anchorX} ${wrap.anchorY})">${wrap.glow.map(partToSVG).join('')}</g>`;
+  html += `<g id="wrap-bow" transform="translate(${wrap.anchorX} ${wrap.anchorY})">${wrap.bow.map(partToSVG).join('')}</g>`;
+  html += `<g id="presentation-layer"></g>`;
+  stage.innerHTML = html;
+
+  scene = {
+    bounds: b,
+    loose: stage.querySelector('#loose'),
+    piecesLayer: stage.querySelector('#pieces-layer'),
+    presentationLayer: stage.querySelector('#presentation-layer'),
+    wrapping: {
+      anchorX: wrap.anchorX,
+      anchorY: wrap.anchorY,
+      back: stage.querySelector('#wrap-back'),
+      front: stage.querySelector('#wrap-front'),
+      bow: stage.querySelector('#wrap-bow'),
+      glow: stage.querySelector('#wrap-glow')
+    },
+    items: []
+  };
+  for (const g of stage.querySelectorAll('.piece')) {
+    const m = Number(g.dataset.m);
+    const pc = bouquet.find((x) => x.m === m);
+    const stem = g.querySelector('.stem');
+    const stemGeom = stemFor(pc, b.baseY);
+    const len = curveLength(stemGeom);
+    stem.setAttribute('stroke-dasharray', len.toFixed(1));
+    const leafEls = [...g.querySelectorAll('.leaves > *')].map((el, idx) => ({
+      el,
+      tx: (byMonth.get(m) || [])[idx]?.tx ?? 0,
+      ty: (byMonth.get(m) || [])[idx]?.ty ?? 0,
+      rot: (byMonth.get(m) || [])[idx]?.rot ?? 0
+    }));
+    scene.items.push({
+      pc, group: g, stem, stemGeom, len, leaves: leafEls,
+      head: g.querySelector('.head'), glint: g.querySelector('.arrival-glint'),
+      lastTau: tau, nextGen: 0
+    });
+  }
+
+  const last = bouquet[bouquet.length - 1];
+  const orden = bouquet.map(p => p.species[0].toUpperCase());
+  out.innerHTML =
+    `<b>mes ${months} · ${last ? last.species : '—'}</b>\n` +
+    `ρₘ = c·√m = ${last ? last.pos.rho.toFixed(1) : 0}   (c = ${BOUQUET_SPACING}, sin capacidad máxima)\n` +
+    `θₘ = m·ψ = ${last ? ((last.m * PSI * 180 / Math.PI) % 360).toFixed(2) : 0}°\n` +
+    `hoja:  x(u) = w·sin(π·u^0.7)(1 − 0.12u) + κ·L·u²\n` +
+    `tallo: dashoffset = (1 − τ)·longitud\n` +
+    `hoja:  rot = rot₁ − 46°(1 − τ),  escala = 0.15 + 0.85τ\n` +
+    `orden: ${orden.slice(0, 48).join(' ')}${orden.length > 48 ? ' …' : ''}`;
+  noteEl.textContent = `${countNodes()} nodos SVG en el ramo.`;
+  applyFrame(performance.now() / 1000);
+}
+
+/* ── Animación ──────────────────────────────────────────── */
+
+function applyFrame(now) {
+  if (mode === 'flor') {
+    if (!breatheEl.checked) return;
+    const g = stage.querySelector('.solo');
+    if (!g) return;
+    const s = Math.sin((2 * Math.PI * now) / 7);
+    g.setAttribute('transform',
+      `translate(230 250) rotate(${(1.5 * s).toFixed(3)}) scale(${(1 + 0.012 * s).toFixed(4)})`);
+    return;
+  }
+  if (!scene) return;
+
+  const at = anim ? now - anim.t0 : Infinity;
+  if (anim) {
+    const overall = clamp01(at / Math.max(anim.sched.total, 0.001));
+    const label = anim.sched.only != null
+      ? `Presentando flor del mes ${anim.sched.only}`
+      : 'Despertando el ramo desde las puntas';
+    setMotionStatus(label, overall, true);
+  }
+  if (anim && at > anim.sched.total + 0.3) {
+    const finished = anim;
+    anim = null;
+    // Durante la presentación, la flor mensual vive al frente. Al terminar,
+    // todas las piezas recuperan el orden estable de planos del ramo.
+    if (finished.sched.only != null) {
+      for (const item of scene.items) scene.piecesLayer.append(item.group);
+    }
+    setMotionStatus(
+      finished.sched.only != null ? `Flor del mes ${finished.sched.only} agregada` : 'Ramo despierto',
+      1,
+      false
+    );
+    if (finished.resolve) finished.resolve(true);
+  }
+
+  const wrapOverall = anim ? clamp01(at / Math.max(anim.sched.total, 0.001)) : 1;
+  const wrapState = wrappingMotion(wrapOverall, Boolean(anim?.sched.only != null));
+  const paperTransform =
+    `translate(${scene.wrapping.anchorX} ${(scene.wrapping.anchorY + wrapState.paperY).toFixed(2)}) ` +
+    `scale(${wrapState.paperScaleX.toFixed(4)} ${wrapState.paperScaleY.toFixed(4)})`;
+  scene.wrapping.back.setAttribute('opacity', wrapState.paperOpacity.toFixed(3));
+  scene.wrapping.front.setAttribute('opacity', wrapState.paperOpacity.toFixed(3));
+  scene.wrapping.back.setAttribute('transform', paperTransform);
+  scene.wrapping.front.setAttribute('transform', paperTransform);
+  const bowTransform =
+    `translate(${scene.wrapping.anchorX} ${scene.wrapping.anchorY}) ` +
+    `rotate(${wrapState.bowRot.toFixed(3)}) scale(${wrapState.bowScale.toFixed(4)})`;
+  scene.wrapping.bow.setAttribute('opacity', wrapState.bowOpacity.toFixed(3));
+  scene.wrapping.bow.setAttribute('transform', bowTransform);
+  scene.wrapping.glow.setAttribute('opacity', wrapState.glow.toFixed(3));
+  scene.wrapping.glow.setAttribute('transform',
+    `translate(${scene.wrapping.anchorX} ${scene.wrapping.anchorY}) scale(${(1 + wrapState.glow * 0.35).toFixed(4)})`);
+
+  for (const it of scene.items) {
+    const slot = anim ? anim.sched.map.get(it.pc.m) : undefined;
+    const t = anim ? tauFor(at, slot) * tau : tau;
+    const progress = anim ? tauFor(at, slot) : 1;
+    const presenting = Boolean(anim && anim.sched.only === it.pc.m);
+    const arrival = presenting ? presentationMotion(progress) : {
+      liftY: 0, scale: 1, glint: 0, glintScale: 1
+    };
+    const tip = anim && slot ? it.stemGeom.at(progress) : [it.pc.pos.x, it.pc.pos.y];
+
+    it.stem.setAttribute('stroke-dashoffset', ((1 - progress) * it.len).toFixed(1));
+
+    const uf = leafUnfold(progress);
+    for (const lf of it.leaves) {
+      lf.el.setAttribute('transform',
+        `translate(${lf.tx} ${lf.ty}) rotate(${(lf.rot + uf.rotOffset).toFixed(2)}) scale(${uf.scale.toFixed(3)})`);
+    }
+
+    // La geometría solo se regenera mientras la flor está abriéndose,
+    // y como mucho cada 40 ms. Ya abierta, no se toca.
+    if (Math.abs(t - it.lastTau) > 0.012 && now >= it.nextGen) {
+      it.head.innerHTML = flowerSVG(it.pc.species, it.pc.params, t, it.pc.lod);
+      it.lastTau = t;
+      it.nextGen = now + 0.04;
+    }
+
+    const amb = breatheEl.checked ? ambient(now, it.pc) : { rot: 0, scale: 1 };
+    const headX = tip[0];
+    const headY = tip[1] + arrival.liftY;
+    it.head.setAttribute('transform',
+      `translate(${headX.toFixed(2)} ${headY.toFixed(2)}) ` +
+      `scale(${(it.pc.pos.scale * amb.scale * arrival.scale).toFixed(4)}) ` +
+      `rotate(${(it.pc.tilt + amb.rot).toFixed(3)})`);
+    it.glint.setAttribute('opacity', arrival.glint.toFixed(3));
+    it.glint.setAttribute('transform',
+      `translate(${headX.toFixed(2)} ${headY.toFixed(2)}) ` +
+      `scale(${(it.pc.pos.scale * arrival.glintScale).toFixed(4)})`);
+  }
+
+  if (scene.loose) {
+    scene.loose.setAttribute('opacity',
+      (0.5 * (anim ? looseOpacity(at, anim.sched.total) : 1)).toFixed(3));
+  }
+}
+
+let raf = null;
+function loop(now) {
+  // El callback actual ya se consumió. Reiniciar primero evita que una
+  // excepción deje un identificador viejo y congele los botones para siempre.
+  raf = null;
+  try {
+    applyFrame(now / 1000);
+  } catch (error) {
+    console.error('abs<3 · error de animación', error);
+    const failed = anim;
+    anim = null;
+    if (failed?.resolve) failed.resolve(false);
+    breatheEl.checked = false;
+    setMotionStatus('No se pudo animar; recarga ABRIR.html', 0, false);
+  }
+  if (anim || breatheEl.checked) startLoop();
+}
+function startLoop() { if (raf == null) raf = requestAnimationFrame(loop); }
+function stopLoop() { if (raf != null) { cancelAnimationFrame(raf); raf = null; } }
+
+function cancelActiveAnimation() {
+  if (anim?.resolve) anim.resolve(false);
+  anim = null;
+}
+
+function enterBouquetMode() {
+  if (mode !== 'ramo') {
+    mode = 'ramo';
+    syncModeButtons();
+  }
+}
+
+function showBouquetState(targetMonths, targetSeed = seedEl.value || 'x') {
+  cancelActiveAnimation();
+  enterBouquetMode();
+  seedEl.value = targetSeed;
+  months = Math.max(0, Math.floor(Number(targetMonths) || 0));
+  rebuildBouquet();
+  buildSliders();
+  render();
+}
+
+function playAwakening() {
+  enterBouquetMode();
+  if (!bouquet.length) {
+    setMotionStatus('Aún no hay flores desbloqueadas', 1, false);
+    return Promise.resolve(true);
+  }
+  cancelActiveAnimation();
+  const promise = new Promise((resolve) => {
+    anim = { t0: performance.now() / 1000, sched: awakenSchedule(bouquet), resolve };
+  });
+  setMotionStatus('Despertando el ramo desde las puntas', 0, true);
+  applyFrame(anim.t0);
+  startLoop();
+  return promise;
+}
+
+function playMonthlyArrival(targetMonth) {
+  cancelActiveAnimation();
+  enterBouquetMode();
+  months = Math.max(1, Math.floor(Number(targetMonth) || 1));
+  rebuildBouquet();
+  buildSliders();
+  render();
+  const promise = new Promise((resolve) => {
+    anim = {
+      t0: performance.now() / 1000,
+      sched: growthSchedule(bouquet, months),
+      resolve
+    };
+  });
+  setMotionStatus(`Presentando flor del mes ${months}`, 0, true);
+  const newest = scene?.items.find((it) => it.pc.m === months);
+  if (newest) scene.presentationLayer.append(newest.group);
+  applyFrame(anim.t0);
+  startLoop();
+  return promise;
+}
+
+breatheEl.addEventListener('change', () => {
+  if (breatheEl.checked || anim) startLoop();
+  else { stopLoop(); render(); }
+});
+
+document.getElementById('awaken').addEventListener('click', () => {
+  if (mode !== 'ramo') showBouquetState(months);
+  playAwakening();
+});
+
+document.getElementById('grow').addEventListener('click', () => {
+  markLocalPreview();
+  playMonthlyArrival(months + 1);
+});
+
+async function applyOfficialState(state, previousOfficialMonths) {
+  const target = state.unlockedMonths;
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasPrevious = Number.isInteger(previousOfficialMonths) && previousOfficialMonths >= 0;
+  const delta = hasPrevious ? target - previousOfficialMonths : null;
+
+  if (reducedMotion || target === 0 || !hasPrevious || delta <= 0 || delta > 3) {
+    showBouquetState(target, state.seed);
+    if (!reducedMotion && target > 0 && (!hasPrevious || delta > 3)) {
+      await playAwakening();
+    } else {
+      setMotionStatus(
+        target > 0 ? `Estado oficial: mes ${target}` : 'Aún no hay flores desbloqueadas',
+        1,
+        false
+      );
+    }
+    return;
+  }
+
+  // En el caso normal llega un solo mes. Si hubo una ausencia corta, presenta
+  // hasta tres flores pendientes una por una y conserva el destello de cada una.
+  showBouquetState(previousOfficialMonths, state.seed);
+  for (let month = previousOfficialMonths + 1; month <= target; month += 1) {
+    const completed = await playMonthlyArrival(month);
+    if (!completed) return;
+  }
+}
+
+async function synchronizeOfficialState() {
+  const rawUrl = apiUrlEl.value.trim();
+  syncOfficialEl.disabled = true;
+  setApiStatus('Consultando fecha oficial…', 'El teléfono no decide el mes.', 'loading');
+  try {
+    const canonicalUrl = normalizeApiUrl(rawUrl);
+    const cached = loadApiSettings();
+    const sameDeployment = cached.url === canonicalUrl;
+    const lastSeenMonths = sameDeployment && cached.lastMonths != null ? cached.lastMonths : 0;
+    const state = await fetchOfficialState(canonicalUrl, lastSeenMonths);
+    const previous = sameDeployment && cached.seed === state.seed ? cached.lastMonths : null;
+
+    apiUrlEl.value = canonicalUrl;
+    saveApiSettings(state, canonicalUrl);
+    await applyOfficialState(state, previous);
+    const committed = state.newlyCommittedMonths?.length
+      ? ` · ${state.newlyCommittedMonths.length} pendiente(s) confirmada(s)`
+      : '';
+    setApiStatus(
+      `Conectado · mes oficial ${state.unlockedMonths}`,
+      `${state.officialDate} en Mérida · próximo: ${state.nextUnlockDate}${committed}`,
+      'online'
+    );
+  } catch (error) {
+    console.error('abs<3 · error de sincronización', error);
+    setApiStatus(
+      'No se pudo sincronizar',
+      error?.message || 'Revisa la URL /exec y la implementación.',
+      'error'
+    );
+  } finally {
+    syncOfficialEl.disabled = false;
+  }
+}
+
+/* ── Controles ──────────────────────────────────────────── */
+
+function syncModeButtons() {
+  for (const x of document.getElementById('modes').children) {
+    x.setAttribute('aria-pressed', String(x.dataset.mode === mode));
+  }
+  document.getElementById('species').style.display = mode === 'ramo' ? 'none' : 'flex';
+}
+
+document.getElementById('modes').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  mode = b.dataset.mode;
+  syncModeButtons();
+  if (mode === 'ramo') rebuildBouquet();
+  buildSliders(); render();
+});
+
+document.getElementById('species').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  species = b.dataset.sp;
+  for (const x of e.currentTarget.children) x.setAttribute('aria-pressed', String(x === b));
+  reseedFlower(); render();
+});
+
+seedEl.addEventListener('input', () => {
+  if (mode === 'ramo') markLocalPreview();
+  if (mode === 'ramo') rebuildBouquet(); else reseedFlower();
+  render();
+});
+
+foliageEl.addEventListener('change', render);
+wrappingEl.addEventListener('change', render);
+syncOfficialEl.addEventListener('click', synchronizeOfficialState);
+
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  breatheEl.checked = true;
+  startLoop();
+}
+
+reseedFlower();
+rebuildBouquet();
+render();
+
+const savedApi = loadApiSettings();
+const startupApiUrl = savedApi.url || DEFAULT_API_URL;
+if (startupApiUrl) {
+  apiUrlEl.value = startupApiUrl;
+  if (savedApi.lastMonths != null && savedApi.seed) {
+    showBouquetState(savedApi.lastMonths, savedApi.seed);
+    setMotionStatus(`Último estado oficial: mes ${savedApi.lastMonths}`, 1, false);
+  }
+  setApiStatus(
+    'API configurada · sincronización pendiente',
+    savedApi.officialDate
+      ? `Última fecha oficial recibida: ${savedApi.officialDate}`
+      : 'Conectando automáticamente con el deployment @2…',
+    'loading'
+  );
+  setTimeout(synchronizeOfficialState, 0);
+}
+</script>
+</body>
+</html>
